@@ -1,23 +1,5 @@
-{% load static %}
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>SocioScope</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <style type = "text/css" media = "all">
-        .asteriskField {
-            display: none;
-        }
-    </style>
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/event_detection.css' %}">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 
     <!-- <script>
         $(document).ready(function() {
@@ -41,41 +23,35 @@
             });
         });
     </script> -->
-</head>
-<body>
-  
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <h1>SocioScope</h1>
-            </div>
-        </div>
 
-        <!-- <div class="row mt-2">
-            <div class="col-md-12">
-                <input class="form-control" type="text" placeholder="Enter keywords here" aria-label="Search">
-            </div>
-        </div> -->
-        {% load crispy_forms_tags %}
-
-        <div class="row mt-2">
-            <div class="col-md-12">
-                <form method="POST" id="search-form" class="post-form" novalidate>
-                    {% csrf_token %}
-                    {{ form|crispy }}
-                    <button type="submit" class="btn btn-success">Search</button>
-                </form>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class='col-md-12'>
-                {% for tweet in tweets %}
-                    <div id='tweets'>{{tweet}}</div>
-                {% endfor %}
-            </div>
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Twitter Crawler</h1>
         </div>
     </div>
 
-</body>
-</html>
+    {% load crispy_forms_tags %}
+
+    <div class="row mt-2">
+        <div class="col-md-12">
+            <form method="POST" id="search-form" class="post-form" novalidate>
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-success">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class='col-md-12'>
+            {% if plot_div %}
+                <br/>
+                <h3>Distribution of tweets related to the keyword:</h3>
+                <!-- {% autoescape off %} -->
+                {{ plot_div|safe }}
+                <!-- {% endautoescape %} -->
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

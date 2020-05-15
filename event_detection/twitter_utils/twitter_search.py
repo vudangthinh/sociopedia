@@ -1,6 +1,6 @@
 import sys
 import tweepy
-from .models import Tweet
+from ..models import Tweet
 
 class StreamListener(tweepy.StreamListener):
     def __init__(self, keyword, tweet_limit):
