@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 
-    <!-- <script>
+<!-- <script>
         $(document).ready(function() {
             $('#search-form').on('submit', function(event) {
                 var keyword = $("#id_keyword").val();
@@ -25,33 +25,38 @@
     </script> -->
 
 {% block content %}
-    <div class="row">
-        <div class="col-md-12">
-            <h1>Twitter Crawler</h1>
-        </div>
+<div class="row">
+    <div class="col-md-12">
+        <h1>Twitter Crawler</h1>
     </div>
+</div>
 
-    {% load crispy_forms_tags %}
+{% load crispy_forms_tags %}
 
-    <div class="row mt-2">
-        <div class="col-md-12">
-            <form method="POST" id="search-form" class="post-form" novalidate>
-                {% csrf_token %}
-                {{ form|crispy }}
-                <button type="submit" class="btn btn-success">Search</button>
-            </form>
-        </div>
+<div class="row mt-2">
+    <div class="col-md-12">
+        <form method="POST" id="search-form" class="post-form" novalidate>
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-success">Search</button>
+        </form>
     </div>
+</div>
 
-    <div class="row">
-        <div class='col-md-12'>
-            {% if plot_div %}
-                <br/>
-                <h3>Distribution of tweets related to the keyword:</h3>
-                <!-- {% autoescape off %} -->
-                {{ plot_div|safe }}
-                <!-- {% endautoescape %} -->
-            {% endif %}
-        </div>
+{% if plot_div %}
+<h3>Distribution of tweets related to the keyword:</h3>
+<br />
+<div class="row">
+    <!-- <div class="col-md-2">
+        
+    </div> -->
+
+    <div class="col-md-12">
+        <!-- {% autoescape off %} -->
+        {{ plot_div|safe }}
+        <!-- {% endautoescape %} -->
     </div>
+</div>
+{% endif %}
+
 {% endblock %}
