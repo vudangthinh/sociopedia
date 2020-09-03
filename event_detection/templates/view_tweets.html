@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load list_index %}
+
+<div class="row">
+    <div class="col-md-12">
+        <h1>Tweets</h1>
+    </div>
+</div>
+
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Tweet ID</th>
+            <th scope="col">Tweet</th>
+            <th scope="col">Create Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tweet in tweets %}
+        <div>
+            <tr>
+                <th scope="row">{{ tweet_index|index:forloop.counter0 }}</th>
+                <td>{{ tweet.tweet_id }}</td>
+                <td style="word-wrap: break-word">{{ tweet.text }}</td>
+                <td>{{ tweet.created_at }}</td>
+            </tr>
+        </div>
+        {% endfor %}
+
+    </tbody>
+</table>
+
+{% if tweets.has_other_pages %}
+    <ul class="pagination flex-wrap justify-content-center">
+        {% if tweets.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ tweets.previous_page_number }}">&laquo;</a></li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+
+        {% for i in page_range %}
+            {% if i == -1 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% else %}
+                {% if tweets.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }} <span class="page-link sr-only">(current)</span></span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if tweets.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ tweets.next_page_number }}">&raquo;</a></li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+    </ul>
+{% endif %}
+
+{% endblock %}

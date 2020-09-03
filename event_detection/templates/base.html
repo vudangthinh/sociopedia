@@ -4,7 +4,7 @@
 <html lang="en">
 
 <head>
-    <title>SocioScopePlus</title>
+    <title>SocioPedia</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
 
@@ -18,7 +18,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'event_detection/style.css' %}">
 
-    
+
     <!-- Font Awesome JS -->
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
         integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
@@ -29,8 +29,11 @@
 
 
     <!-- jQuery CDN - Slim version (=without AJAX) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script> -->
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
         crossorigin="anonymous"></script>
     <!-- Popper.JS -->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
@@ -43,22 +46,66 @@
     <!-- jQuery Custom Scroller CDN -->
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
-    <!-- Custom JS -->
-    <script src="{% static 'event_detection/main.js' %}"></script>
     <!-- Plotly JS -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
+    <!-- Custom JS -->
+    <script src="{% static 'event_detection/main.js' %}"></script>
+
+    {% block style %}
+    {% endblock style %}
+
+    {% block javascript %}
+    {% endblock javascript %}
 </head>
 
 <body>
+    
+
     <div class="wrapper">
+        <nav class="navbar navbar-expand-md navbar-light bg-light flex-row">
+            <span class="navbar-text d-none d-md-block">Address</span>
+            <a class="navbar-brand mx-md-auto mr-auto" href="/">
+                Brand
+            </a>
+            <span class="navbar-text d-none d-md-block">Phone</span>
+            <button class="navbar-toggler ml-lg-0" type="button" data-toggle="collapse" data-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </nav>
+        <nav class="navbar p-0 navbar-expand-md navbar-light">
+            <div class="collapse navbar-collapse bg-light px-3" id="navbarContent">
+                <ul class="navbar-nav mx-md-auto mx-0 w-50 align-items-start nav-fill">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
         <nav id="sidebar">
             <div class="sidebar-header">
-                <h2>SocioScope<sup><i class="fas fa-plus fa-xs"></i></sup></i></h2>
+                <h2>SocioPedia</h2>
             </div>
 
             <ul class="list-unstyled components">
-                <!-- <p>Dummy Heading</p> -->
+                <!-- {% if user.is_authenticated %}
+                <p>Hello {{ user.username }}<small>(<a href="{% url 'logout' %}">Log out</a>)</small></p>
+                {% else %}
+                <a class="btn" href="{% url 'login' %}">Login</a>
+                {% endif %} -->
                 <li {% if title == "search" %} class="active" {% endif %}>
                     <a href="{% url 'search'%}">
                         <i class="fas fa-home fa-fw"></i>
@@ -71,23 +118,43 @@
                         System Management
                     </a>
                 </li>
-                <li>
-                    <a href="#">
+                <li {% if title == "data_crawler" %} class="active" {% endif %}>
+                    <a href="{% url 'data_crawler'%}">
                         <i class="fas fa-cogs fa-fw"></i>
                         Data Crawler
                     </a>
                 </li>
-                <li>
-                    <a href="#">
+                <li {% if title == "report" %} class="active" {% endif %}>
+                    <a href="{% url 'report'%}">
                         <i class="fas fa-clipboard-list fa-fw"></i>
                         Report
                     </a>
                 </li>
-                <li>
-                    <a href="#">
+                <li {% if title == "keyword_analysis" %} class="active" {% endif %}>
+                    <a href="#data_analysis_submenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                         <i class="fas fa-chart-bar fa-fw"></i>
-                        Data Analysis
+                        Home
                     </a>
+                    <ul class="collapse list-unstyled" id="data_analysis_submenu">
+                        <li>
+                            <a href="{% url 'data_analysis'%}">
+                                <i class="fas fa-chart-line fa-fw"></i>
+                                Time Series
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'word_cloud'%}">
+                                <i class="fas fa-cloud fa-fw"></i>
+                                Word Cloud
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'knowledge_graph'%}">
+                                <i class="fas fa-hashtag fa-fw"></i>
+                                Knowledge Graph
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li {% if title == "about" %} class="active" {% endif %}>
                     <a href="{% url 'about'%}">
@@ -101,14 +168,36 @@
 
         <div id="content">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="wrapper d-flex align-items-stretch">
-                    <div class="custom-menu">
-                        <button type="button" id="sidebarCollapse" class="btn btn-primary">
-                            <i class="fa fa-bars"></i>
-                            <span class="sr-only">Toggle Menu</span>
-                        </button>
-                    </div>
-                </div>
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <div class="wrapper d-flex align-items-stretch">
+                            <div class="custom-menu">
+                                <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                                    <i class="fa fa-bars"></i>
+                                    <span class="sr-only">Toggle Menu</span>
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        {% if user.is_authenticated %}
+                        <span>Hello {{ user.username }} (<a href="{% url 'logout' %}">Log out</a>)</span>
+                        <!-- <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Hello {{ user.username }}
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
+                            </div>
+                        </div> -->
+                        {% else %}
+                        <button class="btn"><a href="{% url 'login' %}">Login</a></button>
+                        {% endif %}
+                    </li>
+                </ul>
             </nav>
 
             {% block content %}

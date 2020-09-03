@@ -1,79 +1,123 @@
+# https://stackoverflow.com/questions/48034725/tweepy-connection-broken-incompleteread-best-way-to-handle-exception-or-can
 import sys
+import time
 import tweepy
-from ..models import Tweet
+import json
+from ..models import Tweet, Keyword, TwitterToken
+from queue import Queue
+from threading import Thread
+from tweepy.models import Status
+import dateutil.parser
+import time
+from django.utils import timezone
 
 class StreamListener(tweepy.StreamListener):
-    def __init__(self, keyword, tweet_limit):
+    def __init__(self, keyword_obj_list, used_token, q=Queue()):
         super(StreamListener, self).__init__()
+        num_worker_threads = 8
+        self.q = q
 
-        self.keyword = keyword
-        self.tweet_limit = tweet_limit
-        self.tweet_counter = 0
-
-    def on_status(self, status):
-        is_retweet = False
-        if hasattr(status, 'retweeted_status'):
-            is_retweet = True
-
-        if hasattr(status, 'extended_tweet'):
-            text = status.extended_tweet['full_text']
-        else:
-            text = status.text
-
-        is_quote = hasattr(status, "quoted_status")
-        quoted_text = ""
-        if is_quote:
-            # check if quoted tweet's text has been truncated before recording it
-            if hasattr(status.quoted_status, "extended_tweet"):
-                quoted_text = status.quoted_status.extended_tweet["full_text"]
-            else:
-                quoted_text = status.quoted_status.text
-
-        # remove characters that might cause problems with csv encoding
-        remove_characters = [",", "\n"]
-        for c in remove_characters:
-            text.replace(c, " ")
-            quoted_text.replace(c, " ")
+        for i in range(num_worker_threads):
+            t = Thread(target=self.save_tweets)
+            t.daemon = True
+            t.start()
         
-        # Tweet.objects.create(status.track, status.created_at, status.user.screen_name, is_retweet, is_quote, text, quoted_text).save()
-        with open("/data/django/socioscope/out.csv", "a", encoding='utf-8') as f:
-            f.write("%s,%s,%s,%s,%s,%s\n" % (status.created_at, status.user.screen_name, is_retweet, is_quote, text, quoted_text))
+        self.used_token = used_token
+        self.keyword_obj_list = keyword_obj_list
+        self.end_date = self.keyword_obj_list[0].end_date
+        self.start_time = int(time.time())
 
-        Tweet.objects.create(keyword=self.keyword,
-                            created_at=status.created_at, 
-                            user=status.user.screen_name, 
-                            is_retweet=is_retweet, 
-                            is_quote=is_quote, 
-                            text=text, 
-                            quoted_text=quoted_text)
+    def on_data(self, raw_data):
+        self.q.put(raw_data)
 
-        self.tweet_counter += 1
-        if self.tweet_counter > self.tweet_limit:
+        if timezone.now() < self.end_date:
+            return True
+        else:
+            self.used_token.used_count -= 1
+            self.used_token.save()
+            return False
+
+    def save_tweets(self):
+        while True:
+            raw_data = self.q.get()
+
+            data = json.loads(raw_data)
+
+            if 'in_reply_to_status_id' in data:
+                status = Status.parse(self.api, data)
+
+                is_retweet = False
+                if hasattr(status, 'retweeted_status'):
+                    is_retweet = True
+
+                if hasattr(status, 'extended_tweet'):
+                    text = status.extended_tweet['full_text']
+                else:
+                    text = status.text
+
+                is_quote = hasattr(status, "quoted_status")
+                quoted_text = ""
+                if is_quote:
+                    if hasattr(status.quoted_status, "extended_tweet"):
+                        quoted_text = status.quoted_status.extended_tweet["full_text"]
+                    else:
+                        quoted_text = status.quoted_status.text
+
+                for keyword_obj in self.keyword_obj_list:
+                    keyword = keyword_obj.keyword
+
+                    if keyword.lower() in text.lower() or keyword.lower() in quoted_text.lower():
+                        Tweet.objects.create(keyword=keyword_obj,
+                                            tweet_id=status.id,
+                                            created_at=status.created_at, 
+                                            user_id=status.user.id, 
+                                            is_retweet=is_retweet, 
+                                            is_quote=is_quote, 
+                                            text=text, 
+                                            quoted_text=quoted_text)
+
+            self.q.task_done()
+
+    # def on_limit(self, track):
+    #     print("Rate Limit Exceeded, Sleep for 5 Mins")
+    #     time.sleep(5 * 60)
+    #     return True
+
+    def on_error(self, status_code):
+        print('Encountered streaming error (', status_code, ')')
+        if status_code == 420:
             return False
         else:
             return True
 
-    def on_error(self, status_code):
-        print('Encountered streaming error (', status_code, ')')
-        sys.exit()
+def stream_search(keyword_obj_list):
+    keywords = set()
+    for keyword_obj in keyword_obj_list:
+        keywords.add(keyword_obj.keyword)
 
+    tokens = TwitterToken.objects.all() # filter only token of admin and current user???
+    used_token = None
+    for token in tokens:
+        if token.used_count < 2:
+            used_token = token
+            token.used_count += 1
+            token.save()
+            break
+    
+    if used_token is None:
+        return None
+    
+    auth = tweepy.OAuthHandler(used_token.consumer_key, used_token.consumer_secret)
+    auth.set_access_token(used_token.access_token, used_token.access_token_secret)
 
-consumer_key = '9TvVKS8HRroMN4wQtBdzNA'
-consumer_secret = 'BrmSzXi4sGzDiRdj7kbPHMRLQNMkbpHeDqtLhWPhU'
-access_token = '1287392767-m7gcpy3wkpNpvMpywC9wwBTzIivWVXvLabhZMlA'
-access_token_secret = 'RHNCzFoLOpUHZhLQu7mDkJGsgtA3xtpKm35596ZfuRY'
+    api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
-
-api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-
-def stream_search(keyword):
-    with open("/data/django/socioscope/out.csv", "w", encoding='utf-8') as f:
-        f.write("date,user,is_retweet,is_quote,text,quoted_text\n")
-
-    tweet_limit = 50
-    streamListener = StreamListener(keyword, tweet_limit)
+    # stream_time_limit = 1 * 60 # 7 * 24 * 60 * 60
+    streamListener = StreamListener(keyword_obj_list, used_token)
     stream = tweepy.Stream(auth=api.auth, listener=streamListener, tweet_mode='extended')
-    stream.filter(track=[keyword.keyword], languages=['en']) #is_async=True
+
+    print("Crawling keywords: ", keywords)
+    stream.filter(track=keywords, is_async=True)
+    return stream
+
     

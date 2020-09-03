@@ -36,6 +36,8 @@ class StreamListener(tweepy.StreamListener):
     def save_tweets(self):
         while True:
             raw_data = self.q.get()
+            print('#####################################')
+            print(raw_data)
 
             data = json.loads(raw_data)
 
@@ -123,7 +125,7 @@ api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 if __name__ == "__main__":
     writer = open(os.path.join("/data_hdd/socioscope/data",
-                               'tweets.csv'), "w", encoding='utf-8')
+                               'tweets.csv.test.2'), "w", encoding='utf-8')
     writer.write(
         "tweet_id,date,user_id,user,is_retweet,is_quote,text,quoted_text\n")
 

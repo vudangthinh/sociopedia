@@ -13,4 +13,9 @@ $(document).ready(function () {
         $(this).addClass('active');
     });
 
+    $('#search-form').on('submit', function () {
+        $("#btn-submit").attr("disabled", true);
+        $('#btn-submit').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Searching...')
+    });
+
 });

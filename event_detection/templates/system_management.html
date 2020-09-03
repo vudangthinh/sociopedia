@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<head>
+    <script type="text/javascript" language="javascript">
+        $(document).ready(function () {
+            $('button.btn-delete').bind('click', function (event) {
+                var keyword_id = $(this).attr("id");
+                
+                $.ajax({
+                    type: 'GET',
+                    url: "{% url 'delete_keyword' %}",
+                    data: {"keyword_id": keyword_id},
+                    dataType: 'json',
+                    success: function (response) {
+                        $('#tr-'.concat(keyword_id)).remove();
+                    },
+                    error: function (response) {
+                        alert(response);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <h1>Keyword Management</h1>
+    </div>
+</div>
+
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Keyword</th>
+            <th scope="col">Search Date</th>
+            <th scope="col">Status</th>
+            <th scope="col">Tweets</th>
+            <th scope="col">Handle</th>
+            <th scope="col">Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for key in keywords %}
+        <div>
+            <tr id="tr-{{key.id}}">
+                <th scope="row">{{ forloop.counter }}</th>
+                <td><a href="{% url 'view_tweets' pk=key.pk %}">{{ key.keyword }}</a></td>
+                <td>{{ key.search_date }}</td>
+                {% if key.is_streaming %}
+                    <td>Running</td>
+                {% else %}
+                    <td>Finished</td>
+                {% endif %}
+                <td>{{ key.n_tweets }}</td>
+                <td><button>Stop</button></td>
+                <td><button class="btn-delete" id="{{ key.id }}">Delete</button></td>
+            </tr>
+        </div>
+        {% endfor %}
+
+    </tbody>
+</table>
+
+{% endblock %}
