@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import KeywordSearchForm, KeywordAnalysisForm
+from .forms import KeywordSearchForm, KeywordAnalysisForm, SelectTimeRangeForm
 from .twitter_utils import twitter_search, knowledge_extract
 from django.http import JsonResponse
 from .models import Keyword, Tweet
@@ -273,11 +273,13 @@ def view_tweets(request, pk):
     for tweet in tweets:
         tweet.created_at = tweet.created_at.strftime("%Y/%m/%d, %H:%M:%S")
 
+    form = SelectTimeRangeForm()
     return render(request, 'view_tweets.html', {'title': 'system_management', 
                                                 'tweets': tweets, 
                                                 'tweet_index': tweet_index, 
                                                 'page_range': page_range,
-                                                'plot_div': plot_div})
+                                                'plot_div': plot_div,
+                                                'form': form})
 
 @login_required
 def home(request):

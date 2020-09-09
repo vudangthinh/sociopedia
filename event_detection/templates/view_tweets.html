@@ -1,7 +1,47 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<head>
+    <!-- XDSoft DateTimePicker -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css"
+        integrity="sha256-DOS9W6NR+NFe1fUhEE0PGKY/fubbUCnOfTje2JMDw3Y=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"
+        integrity="sha256-FEqEelWI3WouFOo2VWP/uJfs1y8KJ++FLh2Lbqc8SJk=" crossorigin="anonymous"></script>
+        
+    <script>
+        $(document).ready(function () {
+            $("#id_start_date").datetimepicker({
+                format: 'Y-m-d H:i'
+            });
+            $("#id_end_date").datetimepicker({
+                format: 'Y-m-d H:i'
+            });
+        });
+
+
+        $("#search-form").submit(function (e) {
+            
+            e.preventDefault();
+            alert('Hello')
+            // var serializedData = $(this).serialize();
+            // $.ajax({
+            //     type: 'POST',
+            //     url: "{% url 'knowledge_graph' %}",
+            //     data: serializedData,
+            //     success: function (response) {
+                    
+            //     },
+            //     error: function (response) {
+            //         alert(response["responseJSON"]["error"]);
+            //     }
+            // })
+        })
+    </script>
+</head>
+
 {% load list_index %}
+{% load crispy_forms_tags %}
 
 <div class="font-up-bold text-uppercase">
     <nav aria-label="breadcrumb">
@@ -22,10 +62,6 @@
 <h3>Tweets in time distribution:</h3>
 <br />
 <div class="row">
-    <!-- <div class="col-md-2">
-        
-    </div> -->
-
     <div class="col-md-12">
         <!-- {% autoescape off %} -->
         {{ plot_div|safe }}
@@ -38,9 +74,21 @@
 
 <div>
     <h3>Select time range:</h3>
-    
+    <form method="POST" id="search-form" class="post-form" novalidate>
+        {% csrf_token %}
+        <div class="row">
+            {% for field in form %}
+            <div class="form-group col-6">
+                <label class="col-4">{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary">Show tweets</button>
+    </form>
 </div>
 
+<br>
 <div>
     <h3>View tweets:</h3>
     <table class="table">

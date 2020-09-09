@@ -8,6 +8,10 @@ class KeywordSearchForm(forms.ModelForm):
         model = Keyword
         fields = ('keyword', 'end_date')
 
+class SelectTimeRangeForm(forms.Form):
+    start_date = forms.DateTimeField(input_formats=['%d/%m/%Y %H:%M'])
+    end_date = forms.DateTimeField(input_formats=['%d/%m/%Y %H:%M'])
+
 class KeywordAnalysisForm(forms.ModelForm):
 
     CHOICES = [('Option 1', 'Minute'), ('Option 2', 'Hour'), ('Option 3', 'Day'), ('Option 4', 'Week'), ('Option 5', 'Month')]

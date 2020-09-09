@@ -128,6 +128,14 @@
                     </li>
                 </ul>
             </div>
+
+            <div class="mr-auto">
+                {% if user.is_authenticated %}
+                <span>Hello {{ user.username }} (<a href="{% url 'logout' %}">Log out</a>)</span>
+                {% else %}
+                <button class="btn"><a href="{% url 'login' %}">Login</a></button>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
