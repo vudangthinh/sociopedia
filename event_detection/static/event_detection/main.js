@@ -1,17 +1,17 @@
 $(document).ready(function () {
 
-    $("#sidebar").mCustomScrollbar({
-         theme: "minimal"
-    });
+    // $("#sidebar").mCustomScrollbar({
+    //      theme: "minimal"
+    // });
 
-    $('#sidebarCollapse').on('click', function () {
-        $('#sidebar, #content').toggleClass('active');
-    });
+    // $('#sidebarCollapse').on('click', function () {
+    //     $('#sidebar, #content').toggleClass('active');
+    // });
 
-    $('#sidebar ul li').on('click', function () {
-        $('#sidebar ul .active').removeClass('active');
-        $(this).addClass('active');
-    });
+    // $('#sidebar ul li').on('click', function () {
+    //     $('#sidebar ul .active').removeClass('active');
+    //     $(this).addClass('active');
+    // });
 
     $('#search-form').on('submit', function () {
         $("#btn-submit").attr("disabled", true);

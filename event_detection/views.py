@@ -18,7 +18,7 @@ from wordcloud import WordCloud, STOPWORDS
 import threading
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from . import utils
 
 # Create your views here.
 
@@ -226,6 +226,7 @@ def system_management(request):
             keyword.is_streaming = True
             
         keyword.n_tweets = keyword.tweets.count()
+
     return render(request, 'system_management.html', {'title': 'system_management', 'keywords': keywords})
 
 @csrf_exempt
@@ -240,6 +241,8 @@ def delete_keyword(request):
 
 def view_tweets(request, pk):
     tweet_list = Tweet.objects.filter(keyword=pk)
+    plot_div = utils.plot_distribution(tweet_list)
+
     page = request.GET.get('page', 1)
 
     tweet_per_page = 50
@@ -267,10 +270,18 @@ def view_tweets(request, pk):
     elif page_end < tweets.paginator.page_range[-1] + 1:
         page_range = page_range + [tweets.paginator.page_range[-1]]
 
+    for tweet in tweets:
+        tweet.created_at = tweet.created_at.strftime("%Y/%m/%d, %H:%M:%S")
+
     return render(request, 'view_tweets.html', {'title': 'system_management', 
                                                 'tweets': tweets, 
                                                 'tweet_index': tweet_index, 
-                                                'page_range': page_range})
+                                                'page_range': page_range,
+                                                'plot_div': plot_div})
+
+@login_required
+def home(request):
+    return render(request, 'home.html', {'title': 'home'})
 
 @login_required
 def about(request):

@@ -3,62 +3,101 @@
 {% block content %}
 {% load list_index %}
 
-<div class="row">
-    <div class="col-md-12">
-        <h1>Tweets</h1>
-    </div>
+<div class="font-up-bold text-uppercase">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a class="" href="{% url 'system_management'%}">
+                    <h5 class="mr-3 mb-0"><strong>Keyword Management</strong></h5>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <h5 class="mr-3 mb-0"><strong>View Tweets</strong></h5>
+            </li>
+        </ol>
+    </nav>
 </div>
 
-<table class="table">
-    <thead class="thead-dark">
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Tweet ID</th>
-            <th scope="col">Tweet</th>
-            <th scope="col">Create Time</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for tweet in tweets %}
-        <div>
+{% if plot_div %}
+<h3>Tweets in time distribution:</h3>
+<br />
+<div class="row">
+    <!-- <div class="col-md-2">
+        
+    </div> -->
+
+    <div class="col-md-12">
+        <!-- {% autoescape off %} -->
+        {{ plot_div|safe }}
+        <!-- {% endautoescape %} -->
+    </div>
+</div>
+{% endif %}
+
+<br>
+
+<div>
+    <h3>Select time range:</h3>
+    
+</div>
+
+<div>
+    <h3>View tweets:</h3>
+    <table class="table">
+        <thead class="thead-dark">
             <tr>
-                <th scope="row">{{ tweet_index|index:forloop.counter0 }}</th>
-                <td>{{ tweet.tweet_id }}</td>
-                <td style="word-wrap: break-word">{{ tweet.text }}</td>
-                <td>{{ tweet.created_at }}</td>
+                <th scope="col">#</th>
+                <th scope="col">Tweet ID</th>
+                <th scope="col">Tweet</th>
+                <th scope="col">Create Time</th>
             </tr>
-        </div>
-        {% endfor %}
+        </thead>
+        <tbody>
+            {% for tweet in tweets %}
+            <div>
+                <tr>
+                    <th scope="row">{{ tweet_index|index:forloop.counter0 }}</th>
+                    <td><a target="_blank" rel="noopener noreferrer"
+                            href="https://twitter.com/{{ tweet.user_id }}/status/{{ tweet.tweet_id }}">{{ tweet.tweet_id }}</a>
+                    </td>
+                    <td style="word-wrap: break-word">{{ tweet.text }}</td>
+                    <td>{{ tweet.created_at }}</td>
+                </tr>
+            </div>
+            {% endfor %}
 
-    </tbody>
-</table>
+        </tbody>
+    </table>
 
-{% if tweets.has_other_pages %}
+
+    {% if tweets.has_other_pages %}
     <ul class="pagination flex-wrap justify-content-center">
         {% if tweets.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ tweets.previous_page_number }}">&laquo;</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ tweets.previous_page_number }}">&laquo;</a></li>
         {% else %}
-            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
         {% endif %}
 
         {% for i in page_range %}
-            {% if i == -1 %}
-                <li class="page-item disabled"><span class="page-link">...</span></li>
-            {% else %}
-                {% if tweets.number == i %}
-                    <li class="page-item active"><span class="page-link">{{ i }} <span class="page-link sr-only">(current)</span></span></li>
-                {% else %}
-                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-        
-        {% if tweets.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ tweets.next_page_number }}">&raquo;</a></li>
+        {% if i == -1 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
         {% else %}
-            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% if tweets.number == i %}
+        <li class="page-item active"><span class="page-link">{{ i }} <span
+                    class="page-link sr-only">(current)</span></span></li>
+        {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+
+        {% if tweets.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ tweets.next_page_number }}">&raquo;</a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
         {% endif %}
     </ul>
-{% endif %}
+    {% endif %}
+</div>
 
 {% endblock %}

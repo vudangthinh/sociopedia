@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('signup', views.signup, name='signup'),
-    path('', views.search, name='search'),
+    path('search', views.search, name='search'),
     path('update_search_result', views.update_search_result, name='update_search_result'),
     path('system_management', views.system_management, name='system_management'),
     path('data_analysis', views.data_analysis, name='data_analysis'),
@@ -12,6 +12,8 @@ urlpatterns = [
     path('view_tweets/<int:pk>/', views.view_tweets, name='view_tweets'),
     path('ajax/keyword', views.delete_keyword, name='delete_keyword'),
 
+    path('', views.home, name='home'),
+    path('home', views.home, name='home'),
     path('about', views.about, name='about'),
     path('report', views.report, name='report'),
     path('data_crawler', views.data_crawler, name='data_crawler'),

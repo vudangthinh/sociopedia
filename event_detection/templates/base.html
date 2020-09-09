@@ -51,6 +51,50 @@
 
     <!-- Custom JS -->
     <script src="{% static 'event_detection/main.js' %}"></script>
+    
+    <style>
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+    
+        body {
+            /* Margin bottom by footer height */
+            margin-bottom: 70px;
+            min-height: 75rem;
+            padding-top: 4.5rem;
+        }
+    
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            /* Set the fixed height of the footer here */
+            height: 60px;
+            line-height: 60px;
+            /* Vertically center the text there */
+            background-color: #f5f5f5;
+        }
+    
+        body>.container {
+            padding: 30px 15px 0;
+        }
+    
+        .footer>.container {
+            padding-right: 15px;
+            padding-left: 15px;
+        }
+    
+        .font-up-bold .breadcrumb-item+.breadcrumb-item::before {
+            content: none;
+        }
+    
+        .font-up-bold .breadcrumb-item a h5::after {
+            content: "/";
+            margin-left: 1.5rem;
+            color: #868e96;
+        }
+    </style>
 
     {% block style %}
     {% endblock style %}
@@ -60,151 +104,138 @@
 </head>
 
 <body>
-    
-
-    <div class="wrapper">
-        <nav class="navbar navbar-expand-md navbar-light bg-light flex-row">
-            <span class="navbar-text d-none d-md-block">Address</span>
-            <a class="navbar-brand mx-md-auto mr-auto" href="/">
-                Brand
-            </a>
-            <span class="navbar-text d-none d-md-block">Phone</span>
-            <button class="navbar-toggler ml-lg-0" type="button" data-toggle="collapse" data-target="#navbarContent">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home'%}">SocioPedia</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-        </nav>
-        <nav class="navbar p-0 navbar-expand-md navbar-light">
-            <div class="collapse navbar-collapse bg-light px-3" id="navbarContent">
-                <ul class="navbar-nav mx-md-auto mx-0 w-50 align-items-start nav-fill">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item {% if title == 'home' %} active {% endif %}">
+                        <a class="nav-link" href="{% url 'home'%}">Home <span class="sr-only">(current)</span></a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
+                    <li class="nav-item {% if title == 'search' %} active {% endif %}">
+                        <a class="nav-link" href="{% url 'search'%}">Search</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
+                    <li class="nav-item {% if title == 'system_management' %} active {% endif %}">
+                        <a class="nav-link" href="{% url 'system_management'%}">Manage</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
+                    <li class="nav-item {% if title == 'about' %} active {% endif %}">
+                        <a class="nav-link" href="{% url 'about'%}">About</a>
                     </li>
                 </ul>
             </div>
-        </nav>
+        </div>
+    </nav>
 
-        <nav id="sidebar">
-            <div class="sidebar-header">
-                <h2>SocioPedia</h2>
-            </div>
 
-            <ul class="list-unstyled components">
-                <!-- {% if user.is_authenticated %}
-                <p>Hello {{ user.username }}<small>(<a href="{% url 'logout' %}">Log out</a>)</small></p>
-                {% else %}
-                <a class="btn" href="{% url 'login' %}">Login</a>
-                {% endif %} -->
-                <li {% if title == "search" %} class="active" {% endif %}>
-                    <a href="{% url 'search'%}">
-                        <i class="fas fa-home fa-fw"></i>
-                        Home
-                    </a>
-                </li>
-                <li {% if title == "system_management" %} class="active" {% endif %}>
-                    <a href="{% url 'system_management'%}">
-                        <i class="fas fa-toolbox fa-fw"></i>
-                        System Management
-                    </a>
-                </li>
-                <li {% if title == "data_crawler" %} class="active" {% endif %}>
-                    <a href="{% url 'data_crawler'%}">
-                        <i class="fas fa-cogs fa-fw"></i>
-                        Data Crawler
-                    </a>
-                </li>
-                <li {% if title == "report" %} class="active" {% endif %}>
-                    <a href="{% url 'report'%}">
-                        <i class="fas fa-clipboard-list fa-fw"></i>
-                        Report
-                    </a>
-                </li>
-                <li {% if title == "keyword_analysis" %} class="active" {% endif %}>
-                    <a href="#data_analysis_submenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                        <i class="fas fa-chart-bar fa-fw"></i>
-                        Home
-                    </a>
-                    <ul class="collapse list-unstyled" id="data_analysis_submenu">
-                        <li>
-                            <a href="{% url 'data_analysis'%}">
-                                <i class="fas fa-chart-line fa-fw"></i>
-                                Time Series
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'word_cloud'%}">
-                                <i class="fas fa-cloud fa-fw"></i>
-                                Word Cloud
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'knowledge_graph'%}">
-                                <i class="fas fa-hashtag fa-fw"></i>
-                                Knowledge Graph
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li {% if title == "about" %} class="active" {% endif %}>
-                    <a href="{% url 'about'%}">
-                        <i class="fas fa-question-circle fa-fw"></i>
-                        About
-                    </a>
+    <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <div class="wrapper d-flex align-items-stretch">
+                        <div class="custom-menu">
+                            <button type="button" id="sidebarCollapse" class="btn btn-primary">
+                                <i class="fa fa-bars"></i>
+                                <span class="sr-only">Toggle Menu</span>
+                            </button>
+                        </div>
+                    </div>
                 </li>
             </ul>
 
-        </nav>
-
-        <div id="content">
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <div class="wrapper d-flex align-items-stretch">
-                            <div class="custom-menu">
-                                <button type="button" id="sidebarCollapse" class="btn btn-primary">
-                                    <i class="fa fa-bars"></i>
-                                    <span class="sr-only">Toggle Menu</span>
-                                </button>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        {% if user.is_authenticated %}
-                        <span>Hello {{ user.username }} (<a href="{% url 'logout' %}">Log out</a>)</span>
-                        <!-- <div class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Hello {{ user.username }}
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
-                            </div>
-                        </div> -->
-                        {% else %}
-                        <button class="btn"><a href="{% url 'login' %}">Login</a></button>
-                        {% endif %}
-                    </li>
-                </ul>
-            </nav>
-
-            {% block content %}
-            {% endblock %}
-
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    {% if user.is_authenticated %}
+                    <span>Hello {{ user.username }} (<a href="{% url 'logout' %}">Log out</a>)</span>
+                    {% else %}
+                    <button class="btn"><a href="{% url 'login' %}">Login</a></button>
+                    {% endif %}
+                </li>
+            </ul>
+        </nav> -->
+    
+    <!-- <nav id="sidebar">
+        <div class="sidebar-header">
+            <h2>SocioPedia</h2>
         </div>
-    </div>
+
+        <ul class="list-unstyled components">
+            <li {% if title == "search" %} class="active" {% endif %}>
+                <a href="{% url 'search'%}">
+                    <i class="fas fa-home fa-fw"></i>
+                    Home
+                </a>
+            </li>
+            <li {% if title == "system_management" %} class="active" {% endif %}>
+                <a href="{% url 'system_management'%}">
+                    <i class="fas fa-toolbox fa-fw"></i>
+                    System Management
+                </a>
+            </li>
+            <li {% if title == "data_crawler" %} class="active" {% endif %}>
+                <a href="{% url 'data_crawler'%}">
+                    <i class="fas fa-cogs fa-fw"></i>
+                    Data Crawler
+                </a>
+            </li>
+            <li {% if title == "report" %} class="active" {% endif %}>
+                <a href="{% url 'report'%}">
+                    <i class="fas fa-clipboard-list fa-fw"></i>
+                    Report
+                </a>
+            </li>
+            <li {% if title == "keyword_analysis" %} class="active" {% endif %}>
+                <a href="#data_analysis_submenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                    <i class="fas fa-chart-bar fa-fw"></i>
+                    Home
+                </a>
+                <ul class="collapse list-unstyled" id="data_analysis_submenu">
+                    <li>
+                        <a href="{% url 'data_analysis'%}">
+                            <i class="fas fa-chart-line fa-fw"></i>
+                            Time Series
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'word_cloud'%}">
+                            <i class="fas fa-cloud fa-fw"></i>
+                            Word Cloud
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'knowledge_graph'%}">
+                            <i class="fas fa-hashtag fa-fw"></i>
+                            Knowledge Graph
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li {% if title == "about" %} class="active" {% endif %}>
+                <a href="{% url 'about'%}">
+                    <i class="fas fa-question-circle fa-fw"></i>
+                    About
+                </a>
+            </li>
+        </ul>
+
+    </nav> -->
+
+    <main role="main" class="container">
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <footer class="footer fixed-bottom">
+        <div class="container">
+            <a href="http://ke.cau.ac.kr/kelab/index.php/Main_Page">Knowledge Engineering Lab, Chung-Ang University.</a>
+        </div>
+    </footer>
+
 </body>
 
 </html>
