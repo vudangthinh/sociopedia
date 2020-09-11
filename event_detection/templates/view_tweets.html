@@ -17,31 +17,105 @@
             $("#id_end_date").datetimepicker({
                 format: 'Y-m-d H:i'
             });
+
+            $("#search-form").submit(function (e) {
+                e.preventDefault();
+                // var serializedData = $(this).serialize();
+                var start_date = $("#id_start_date").val();
+                var end_date = $("#id_end_date").val();
+
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'filter_tweets_intime' %}",
+                    data: { 
+                        "id": "{{keyword_id}}", 
+                        "start_date": start_date, 
+                        "end_date": end_date 
+                    },
+                    success: function (response) {
+                        var tweets = JSON.parse(response["tweets"]);
+                        var tweet_index = response["tweet_index"];
+                        var page_range = response["page_range"];
+                        var page_settings = response["page_settings"];
+
+                        $("#tweet-table tbody").html('');
+
+                        $.each(tweets, function (i, val) {
+                            $("#tweet-table tbody").append(
+                                '<tr>' +
+                                '<th scope="row">' + tweet_index[i] + '</th>' +
+                                '<td><a target="_blank" rel="noopener noreferrer" href="https://twitter.com/' + val.fields.user_id + '/status/' + val.fields.tweet_id + '">' + val.fields.tweet_id + '</a>' +
+                                '</td>' +
+                                '<td style="word-wrap: break-word">' + val.fields.text + '</td>' +
+                                '<td>' + val.fields.created_at + '</td>' +
+                                '</tr>'
+                            )
+                        });
+                        
+                        $("#paging").html('');
+                        if (page_settings["has_other_pages"]){
+                            
+                            if (page_settings["has_previous"]){
+                                $("#paging").append('<li class="page-item"><a class="page-link" href="?page={{ tweets.previous_page_number }}">&laquo;</a></li>');
+                            } else {
+                                $("#paging").append('<li class="page-item disabled"><span class="page-link">&laquo;</span></li>');
+                            }
+                            
+                            $.each(page_range, function(i, val) {
+                                if (val == -1) {
+                                    $("#paging").append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                                } else {
+                                    if (val == page_settings["number"]) {
+                                        $("#paging").append('<li class="page-item active"><span class="page-link">' + i + '<span class="page-link sr-only">(current)</span></span></li>');
+                                    } else {
+                                        $("#paging").append('<li class="page-item"><a class="page-link" href="?page=' + i + '">' + i + '</a></li>');
+                                    }
+                                }
+                            });
+
+                            if (page_settings["has_next"]) {
+                                $("#paging").append('<li class="page-item"><a class="page-link" href="?page={{ tweets.next_page_number }}">&raquo;</a></li>');
+                            } else {
+                                $("#paging").append('<li class="page-item disabled"><span class="page-link">&raquo;</span></li>');
+                            }
+
+                        }
+                    },
+                    error: function (response) {
+                        alert(response["responseJSON"]["error"]);
+                    }
+                });
+            });
+
+            $('body').on('click', 'a.page-link', function(e) {
+                e.preventDefault();
+
+                var page_n = $(this).attr('href');
+                console.log(start_date);
+                console.log(end_date);
+                
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'filter_tweets_intime' %}",
+                    data: {
+                        "page_n": page_n,
+                        "id": "{{keyword_id}}", 
+                        "start_date": start_date, 
+                        "end_date": end_date 
+                    },
+                    success: function (response) {
+                        console.log('success');
+                    },
+                    error: function (response) {
+                        alert(response["responseJSON"]["error"]);
+                    }
+                });
+            });
         });
-
-
-        $("#search-form").submit(function (e) {
-            
-            e.preventDefault();
-            alert('Hello')
-            // var serializedData = $(this).serialize();
-            // $.ajax({
-            //     type: 'POST',
-            //     url: "{% url 'knowledge_graph' %}",
-            //     data: serializedData,
-            //     success: function (response) {
-                    
-            //     },
-            //     error: function (response) {
-            //         alert(response["responseJSON"]["error"]);
-            //     }
-            // })
-        })
     </script>
 </head>
 
 {% load list_index %}
-{% load crispy_forms_tags %}
 
 <div class="font-up-bold text-uppercase">
     <nav aria-label="breadcrumb">
@@ -74,7 +148,7 @@
 
 <div>
     <h3>Select time range:</h3>
-    <form method="POST" id="search-form" class="post-form" novalidate>
+    <form method="POST" id="search-form" class="post-form" autocomplete="off" novalidate>
         {% csrf_token %}
         <div class="row">
             {% for field in form %}
@@ -91,7 +165,7 @@
 <br>
 <div>
     <h3>View tweets:</h3>
-    <table class="table">
+    <table class="table" id="tweet-table">
         <thead class="thead-dark">
             <tr>
                 <th scope="col">#</th>
@@ -102,26 +176,24 @@
         </thead>
         <tbody>
             {% for tweet in tweets %}
-            <div>
                 <tr>
                     <th scope="row">{{ tweet_index|index:forloop.counter0 }}</th>
                     <td><a target="_blank" rel="noopener noreferrer"
                             href="https://twitter.com/{{ tweet.user_id }}/status/{{ tweet.tweet_id }}">{{ tweet.tweet_id }}</a>
                     </td>
                     <td style="word-wrap: break-word">{{ tweet.text }}</td>
-                    <td>{{ tweet.created_at }}</td>
+                    <td>{{ tweet.created_at_str }}</td>
                 </tr>
-            </div>
             {% endfor %}
 
         </tbody>
     </table>
 
 
-    {% if tweets.has_other_pages %}
-    <ul class="pagination flex-wrap justify-content-center">
-        {% if tweets.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ tweets.previous_page_number }}">&laquo;</a></li>
+    {% if page_settings.has_other_pages %}
+    <ul class="pagination flex-wrap justify-content-center" id="paging">
+        {% if page_settings.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_settings.previous_page_number }}">&laquo;</a></li>
         {% else %}
         <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
         {% endif %}
@@ -130,7 +202,7 @@
         {% if i == -1 %}
         <li class="page-item disabled"><span class="page-link">...</span></li>
         {% else %}
-        {% if tweets.number == i %}
+        {% if page_settings.number == i %}
         <li class="page-item active"><span class="page-link">{{ i }} <span
                     class="page-link sr-only">(current)</span></span></li>
         {% else %}
@@ -139,8 +211,8 @@
         {% endif %}
         {% endfor %}
 
-        {% if tweets.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ tweets.next_page_number }}">&raquo;</a></li>
+        {% if page_settings.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_settings.next_page_number }}">&raquo;</a></li>
         {% else %}
         <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
         {% endif %}

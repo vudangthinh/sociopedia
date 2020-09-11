@@ -111,10 +111,10 @@ class StreamListener(tweepy.StreamListener):
         sys.exit()
 
 
-consumer_key = '9TvVKS8HRroMN4wQtBdzNA'
-consumer_secret = 'BrmSzXi4sGzDiRdj7kbPHMRLQNMkbpHeDqtLhWPhU'
-access_token = '1287392767-m7gcpy3wkpNpvMpywC9wwBTzIivWVXvLabhZMlA'
-access_token_secret = 'RHNCzFoLOpUHZhLQu7mDkJGsgtA3xtpKm35596ZfuRY'
+consumer_key = '9IbfXJa3Lx3kKbtddUogQ'
+consumer_secret = 'ykoTOPgk0ZPR7bx66Ry2Y7FfydBO4ufQmXNCRbW21q0'
+access_token = 'QV8oUYB66X4ZavYh5z7XlTf4X4DrEk8Nlkxakgk'
+access_token_secret = 'UrrtIS3XjyPSdjqRBnwIDCXCzxQS3TZrlSuoHSq8k'
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)

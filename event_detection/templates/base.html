@@ -77,7 +77,7 @@
         }
     
         body>.container {
-            padding: 30px 15px 0;
+            padding: 20px 15px 0;
         }
     
         .footer>.container {
@@ -181,18 +181,6 @@
                 <a href="{% url 'system_management'%}">
                     <i class="fas fa-toolbox fa-fw"></i>
                     System Management
-                </a>
-            </li>
-            <li {% if title == "data_crawler" %} class="active" {% endif %}>
-                <a href="{% url 'data_crawler'%}">
-                    <i class="fas fa-cogs fa-fw"></i>
-                    Data Crawler
-                </a>
-            </li>
-            <li {% if title == "report" %} class="active" {% endif %}>
-                <a href="{% url 'report'%}">
-                    <i class="fas fa-clipboard-list fa-fw"></i>
-                    Report
                 </a>
             </li>
             <li {% if title == "keyword_analysis" %} class="active" {% endif %}>

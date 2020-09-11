@@ -18,8 +18,9 @@ from django.urls import path, include
 from django.contrib.auth import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/login/', views.LoginView.as_view(), name='login'),
-    path('accounts/logout/', views.LogoutView.as_view(next_page='/'), name='logout'),
+    path('sociopedia/admin/', admin.site.urls),
+    path('sociopedia/accounts/login/', views.LoginView.as_view(), name='login'),
+    path('sociopedia/accounts/logout/', views.LogoutView.as_view(next_page='/sociopedia/'), name='logout'),
     path('', include('event_detection.urls')),
+    path('sociopedia/', include('event_detection.urls')),
 ]

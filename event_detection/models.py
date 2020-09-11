@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import date
 from django.conf import settings
 from django.contrib.auth.models import User
-
+import json
 # Create your models here.
 
 class TwitterToken(models.Model):
@@ -43,3 +43,7 @@ class Tweet(models.Model):
 
     def __str__(self):
         return self.text
+
+    # def toJSON(self):
+    #     return json.dumps(self, default=lambda o: o.__dict__, 
+    #         sort_keys=True, indent=4)

@@ -16,9 +16,11 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from wordcloud import WordCloud, STOPWORDS
 import threading
+from django.core import serializers
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from . import utils
+
 
 # Create your views here.
 
@@ -239,60 +241,57 @@ def delete_keyword(request):
 
     return JsonResponse({"error": "not ajax request"}, status=400)
 
+@login_required
 def view_tweets(request, pk):
     tweet_list = Tweet.objects.filter(keyword=pk)
     plot_div = utils.plot_distribution(tweet_list)
 
     page = request.GET.get('page', 1)
-
-    tweet_per_page = 50
-    tweet_index = [i + 1 for i in range((int(page) - 1) * tweet_per_page, int(page) * tweet_per_page)]
-    paginator = Paginator(tweet_list, tweet_per_page)
-    try:
-        tweets = paginator.page(page)
-    except PageNotAnInteger:
-        tweets = paginator.page(1)
-    except EmptyPage:
-        tweets = paginator.page(paginator.num_pages)
-
-    page_start = tweets.number - 2
-    page_end = tweets.number + 3
-    if page_start <= 0: page_start = 1
-    if page_end > tweets.paginator.page_range[-1] + 1: page_end = tweets.paginator.page_range[-1] + 1
-
-    page_range = list(range(page_start, page_end))
-    if page_start > 2:
-        page_range = [1, -1] + page_range
-    elif page_start > 1:
-        page_range = [1] + page_range
-    if page_end < tweets.paginator.page_range[-1]:
-        page_range = page_range + [-1, tweets.paginator.page_range[-1]]
-    elif page_end < tweets.paginator.page_range[-1] + 1:
-        page_range = page_range + [tweets.paginator.page_range[-1]]
-
-    for tweet in tweets:
-        tweet.created_at = tweet.created_at.strftime("%Y/%m/%d, %H:%M:%S")
-
+    tweets, tweet_index, page_range = utils.paging_tweets(tweet_list, page)
+    
     form = SelectTimeRangeForm()
-    return render(request, 'view_tweets.html', {'title': 'system_management', 
-                                                'tweets': tweets, 
+
+    # page_settings = {}
+    # page_settings['has_other_pages'] = tweets.has_other_pages()
+    # page_settings['has_previous'] = tweets.has_previous()
+    # page_settings['has_next'] = tweets.has_next()
+    # page_settings['previous_page_number'] = tweets.previous_page_number()
+    # page_settings['next_page_number'] = tweets.next_page_number()
+
+    return render(request, 'view_tweets.html', {'title': 'system_management',
+                                                'keyword_id': pk,
+                                                'tweets': tweets.object_list, 
+                                                'page_settings': tweets,
                                                 'tweet_index': tweet_index, 
                                                 'page_range': page_range,
                                                 'plot_div': plot_div,
                                                 'form': form})
 
-@login_required
+@csrf_exempt
+def filter_tweets_intime(request):
+    if request.is_ajax and request.method == "POST":
+        keyword_id = request.POST.get('id', None)
+        start_date = request.POST.get('start_date', None)
+        end_date = request.POST.get('end_date', None)
+        tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
+
+        page = 1
+        tweets, tweet_index, page_range = utils.paging_tweets(tweet_list, page)
+
+        page_settings = {}
+        page_settings['has_other_pages'] = tweets.has_other_pages()
+        page_settings['has_previous'] = tweets.has_previous()
+        page_settings['number'] = tweets.number
+        page_settings['has_next'] = tweets.has_next()
+
+        tweets = serializers.serialize('json', tweets)
+
+        return JsonResponse({"tweets": tweets, "tweet_index": tweet_index, "page_range": page_range, 'page_settings': page_settings}, status=200)
+
+    return JsonResponse({"error": ""}, status=400)
+
 def home(request):
     return render(request, 'home.html', {'title': 'home'})
 
-@login_required
 def about(request):
     return render(request, 'about.html', {'title': 'about'})
-    
-@login_required
-def report(request):
-    return render(request, 'base.html', {'title': 'report'})
-
-@login_required
-def data_crawler(request):
-    return render(request, 'base.html', {'title': 'data_crawler'})
