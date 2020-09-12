@@ -30,13 +30,18 @@
                 $("#tweet-table tbody").html('');
 
                 $.each(tweets, function (i, val) {
+                    var create_time = val.fields.created_at
+                    create_time = create_time.split("T")[0] + ", " + create_time.split("T")[1].split('Z')[0]
+                    create_time = create_time.replace("-", "/")
+                    create_time = create_time.replace("-", "/")
+
                     $("#tweet-table tbody").append(
                         '<tr>' +
                         '<th scope="row">' + tweet_index[i] + '</th>' +
                         '<td><a target="_blank" rel="noopener noreferrer" href="https://twitter.com/' + val.fields.user_id + '/status/' + val.fields.tweet_id + '">' + val.fields.tweet_id + '</a>' +
                         '</td>' +
                         '<td style="word-wrap: break-word">' + val.fields.text + '</td>' +
-                        '<td>' + val.fields.created_at + '</td>' +
+                        '<td>' + create_time + '</td>' +
                         '</tr>'
                     )
                 });
