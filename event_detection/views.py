@@ -273,9 +273,10 @@ def filter_tweets_intime(request):
         keyword_id = request.POST.get('id', None)
         start_date = request.POST.get('start_date', None)
         end_date = request.POST.get('end_date', None)
+        page_n = request.POST.get('page_n', None)
         tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
 
-        page = 1
+        page = int(page_n)
         tweets, tweet_index, page_range = utils.paging_tweets(tweet_list, page)
 
         page_settings = {}
