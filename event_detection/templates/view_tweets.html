@@ -45,26 +45,25 @@
                 if (page_settings["has_other_pages"]){
                     
                     if (page_settings["has_previous"]){
-                        $("#paging").append('<li class="page-item"><a class="page-link" href="?page={{ tweets.previous_page_number }}">&laquo;</a></li>');
+                        $("#paging").append('<li class="page-item"><a class="page-link" href="?page=' + page_settings['previous_page_number'] + '">&laquo;</a></li>');
                     } else {
                         $("#paging").append('<li class="page-item disabled"><span class="page-link">&laquo;</span></li>');
                     }
                     
                     $.each(page_range, function(i, val) {
-                        i++;
                         if (val == -1) {
                             $("#paging").append('<li class="page-item disabled"><span class="page-link">...</span></li>');
                         } else {
                             if (val == page_settings["number"]) {
-                                $("#paging").append('<li class="page-item active"><span class="page-link">' + i + '<span class="page-link sr-only">(current)</span></span></li>');
+                                $("#paging").append('<li class="page-item active"><span class="page-link">' + val + '<span class="page-link sr-only">(current)</span></span></li>');
                             } else {
-                                $("#paging").append('<li class="page-item"><a class="page-link" href="?page=' + i + '">' + i + '</a></li>');
+                                $("#paging").append('<li class="page-item"><a class="page-link" href="?page=' + val + '">' + val + '</a></li>');
                             }
                         }
                     });
 
                     if (page_settings["has_next"]) {
-                        $("#paging").append('<li class="page-item"><a class="page-link" href="?page={{ tweets.next_page_number }}">&raquo;</a></li>');
+                        $("#paging").append('<li class="page-item"><a class="page-link" href="?page=' + page_settings['next_page_number'] + '">&raquo;</a></li>');
                     } else {
                         $("#paging").append('<li class="page-item disabled"><span class="page-link">&raquo;</span></li>');
                     }
@@ -88,54 +87,7 @@
                         "end_date": end_date 
                     },
                     success: function (response) {
-                        var tweets = JSON.parse(response["tweets"]);
-                        var tweet_index = response["tweet_index"];
-                        var page_range = response["page_range"];
-                        var page_settings = response["page_settings"];
-
-                        $("#tweet-table tbody").html('');
-
-                        $.each(tweets, function (i, val) {
-                            $("#tweet-table tbody").append(
-                                '<tr>' +
-                                '<th scope="row">' + tweet_index[i] + '</th>' +
-                                '<td><a target="_blank" rel="noopener noreferrer" href="https://twitter.com/' + val.fields.user_id + '/status/' + val.fields.tweet_id + '">' + val.fields.tweet_id + '</a>' +
-                                '</td>' +
-                                '<td style="word-wrap: break-word">' + val.fields.text + '</td>' +
-                                '<td>' + val.fields.created_at + '</td>' +
-                                '</tr>'
-                            )
-                        });
-                        
-                        $("#paging").html('');
-                        if (page_settings["has_other_pages"]){
-                            
-                            if (page_settings["has_previous"]){
-                                $("#paging").append('<li class="page-item"><a class="page-link" href="?page={{ tweets.previous_page_number }}">&laquo;</a></li>');
-                            } else {
-                                $("#paging").append('<li class="page-item disabled"><span class="page-link">&laquo;</span></li>');
-                            }
-                            
-                            $.each(page_range, function(i, val) {
-                                i++;
-                                if (val == -1) {
-                                    $("#paging").append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                                } else {
-                                    if (val == page_settings["number"]) {
-                                        $("#paging").append('<li class="page-item active"><span class="page-link">' + i + '<span class="page-link sr-only">(current)</span></span></li>');
-                                    } else {
-                                        $("#paging").append('<li class="page-item"><a class="page-link" href="?page=' + i + '">' + i + '</a></li>');
-                                    }
-                                }
-                            });
-
-                            if (page_settings["has_next"]) {
-                                $("#paging").append('<li class="page-item"><a class="page-link" href="?page={{ tweets.next_page_number }}">&raquo;</a></li>');
-                            } else {
-                                $("#paging").append('<li class="page-item disabled"><span class="page-link">&raquo;</span></li>');
-                            }
-
-                        }
+                        load_page(response);
                     },
                     error: function (response) {
                         alert(response["responseJSON"]["error"]);
@@ -148,9 +100,6 @@
 
                 var page_n = $(this).attr('href');
                 page_n = page_n.split("=")[1];
-                console.log(page_n)
-                console.log(start_date);
-                console.log(end_date);
                 
                 $.ajax({
                     type: "POST",
@@ -162,7 +111,6 @@
                         "end_date": end_date 
                     },
                     success: function (response) {
-                        console.log('success');
                         load_page(response);
                     },
                     error: function (response) {

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from plotly.offline import plot
 import plotly.graph_objs as go
 
+from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Keyword, Tweet
 
@@ -125,13 +126,22 @@ def paging_tweets(tweet_list, page):
         page_range = page_range + [tweets.paginator.page_range[-1]]
 
     for tweet in tweets:
+        tweet.user_id = str(tweet.user_id)
+        tweet.tweet_id = str(tweet.tweet_id)
         tweet.created_at_str = tweet.created_at.strftime("%Y/%m/%d, %H:%M:%S")
 
     return tweets, tweet_index, page_range
 
 def get_tweet_in_time_range(pk, start_date, end_date):
-    start_date = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+    if start_date is None or start_date == "":
+        start_date = datetime.strptime("1970-01-01 00:00", "%Y-%m-%d %H:%M")
+    else:
+        start_date = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+
+    if end_date is None or end_date == "":
+        end_date = timezone.now()
+    else:
+        end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
 
     tweet_list = Tweet.objects.filter(keyword=pk, created_at__range=[start_date, end_date])
     return tweet_list

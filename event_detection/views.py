@@ -251,17 +251,20 @@ def view_tweets(request, pk):
     
     form = SelectTimeRangeForm()
 
-    # page_settings = {}
-    # page_settings['has_other_pages'] = tweets.has_other_pages()
-    # page_settings['has_previous'] = tweets.has_previous()
-    # page_settings['has_next'] = tweets.has_next()
-    # page_settings['previous_page_number'] = tweets.previous_page_number()
-    # page_settings['next_page_number'] = tweets.next_page_number()
+    page_settings = {}
+    page_settings['has_other_pages'] = tweets.has_other_pages()
+    page_settings['has_previous'] = tweets.has_previous()
+    page_settings['number'] = tweets.number
+    page_settings['has_next'] = tweets.has_next()
+    if tweets.has_previous():
+        page_settings['previous_page_number'] = tweets.previous_page_number()
+    if tweets.has_next():
+        page_settings['next_page_number'] = tweets.next_page_number()
 
     return render(request, 'view_tweets.html', {'title': 'system_management',
                                                 'keyword_id': pk,
                                                 'tweets': tweets.object_list, 
-                                                'page_settings': tweets,
+                                                'page_settings': page_settings,
                                                 'tweet_index': tweet_index, 
                                                 'page_range': page_range,
                                                 'plot_div': plot_div,
@@ -284,9 +287,17 @@ def filter_tweets_intime(request):
         page_settings['has_previous'] = tweets.has_previous()
         page_settings['number'] = tweets.number
         page_settings['has_next'] = tweets.has_next()
+        if tweets.has_previous():
+            page_settings['previous_page_number'] = tweets.previous_page_number()
+        if tweets.has_next():
+            page_settings['next_page_number'] = tweets.next_page_number()
 
+        # for tweet in tweets:
+        #     tweet.user_id = str(tweet.user_id)
+        #     tweet.tweet_id = str(tweet.tweet_id)
+            
         tweets = serializers.serialize('json', tweets)
-
+        
         return JsonResponse({"tweets": tweets, "tweet_index": tweet_index, "page_range": page_range, 'page_settings': page_settings}, status=200)
 
     return JsonResponse({"error": ""}, status=400)
