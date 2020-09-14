@@ -81,6 +81,11 @@
                 // var serializedData = $(this).serialize();
                 start_date = $("#id_start_date").val();
                 end_date = $("#id_end_date").val();
+                
+                var url = "{% url 'data_analysis' pk=keyword_id start_date='start_date_' end_date='end_date_' %}".replace(/keyword_id/, "{{keyword_id}}");
+                url = url.replace(/start_date_/, start_date);
+                url = url.replace(/end_date_/, end_date);
+                $("a#analyse-tweet").attr("href", url);
 
                 $.ajax({
                     type: 'POST',
@@ -232,4 +237,7 @@
     {% endif %}
 </div>
 
+<div>
+    <a class="btn btn-primary" id="analyse-tweet" role="button" href="{% url 'data_analysis' pk=keyword_id start_date='hello' end_date='helll' %}">Analyse Tweets</a>
+</div>
 {% endblock %}

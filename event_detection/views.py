@@ -45,7 +45,7 @@ def search(request):
         if form.is_valid():
             post = form.save(commit=False)
             print('end_date', post.end_date)
-
+            
             keyword_obj_list = []
             for keyword in post.keyword.strip().split(','):
                 keyword_obj = Keyword.objects.create(user=request.user, keyword=keyword.strip(), search_date=timezone.now(), end_date=post.end_date)
@@ -62,7 +62,7 @@ def search(request):
             # for tweet in tweets:
             #     tweet_texts.append(tweet.text)
 
-            return render(request, 'keyword_search.html', {'title': 'search', 'form': form, 'keyword': post.keyword})
+            return render(request, 'keyword_search.html', {'title': 'search', 'form': form, 'keyword_obj_list': keyword_obj_list})
     else:
         form = KeywordSearchForm()
         end_date = timezone.now() + timedelta(7)
@@ -72,86 +72,12 @@ def search(request):
         return render(request, 'keyword_search.html', {'title': 'search', 'form': form, 'min_date': min_date, 'max_date': max_date})
 
 @login_required
-def data_analysis(request):
-    if request.method == 'POST':
-        form = KeywordAnalysisForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            # post.save()
+def data_analysis(request, pk, start_date, end_date):
+    print(pk, start_date, end_date)
+    tweet_list = utils.get_tweet_in_time_range(pk, start_date, end_date)
 
-            # Show tweets which include keyword
-            # twitter_search.stream_search(post)
-            # keyword_objs = Keyword.objects.filter(keyword=post.keyword)
-            # tweets = Tweet.objects.filter(keyword=keyword_objs[0])
-            # tweet_texts = []
-            # for tweet in tweets:
-            #     tweet_texts.append(tweet.text)
-
-            keyword = Keyword.objects.filter(keyword=post.keyword.lower())[0]
-            result = keyword.tweets.all().values('created_at')
-            # result = Tweet.objects.filter(text__contains=post.keyword).order_by('created_at')
-
-            first_tweet = result.first()
-            first_time = first_tweet['created_at'].timestamp()
-            last_tweet = result.last()
-            last_time = last_tweet['created_at'].timestamp()
-            
-            denominator = 60
-            time_option = form.cleaned_data['time_option']
-            if time_option == 'Option 1': # minute
-                denominator = 60
-            elif time_option == 'Option 2': # hour
-                denominator = 60 * 60
-            elif time_option == 'Option 3': # day
-                denominator = 60 * 60 * 24
-            elif time_option == 'Option 4': # week
-                denominator = 60 * 60 * 24 * 7
-            elif time_option == 'Option 5': # month
-                denominator = 60 * 60 * 24 * 30
-                
-            time_range = int((last_time - first_time) / denominator)
-            if time_range < 1: 
-                time_range = 1
-            x_data = [i for i in range(time_range)]
-
-            counter = collections.Counter()
-            for tweet in result.iterator():
-                date_time = tweet['created_at'].timestamp()
-                counter.update([int((date_time - first_time) / denominator)])
-            
-            y_data = []
-            x_data_date = []
-            for x in x_data:
-                date = datetime.fromtimestamp(x * denominator + first_time)
-                x_data_date.append(date)
-                if x in counter:
-                    y_data.append(counter[x])
-                else:
-                    y_data.append(0)
-
-            fig = go.Figure()
-            bar = go.Bar(x=x_data_date, y=y_data)
-            fig.add_trace(bar)
-            fig.update_layout(
-                xaxis=dict(
-                    title='Time',
-                    type='date'
-                ),
-                yaxis=dict(
-                    title='Number of tweets'
-                ),
-                title='Tweets Distribution'
-            )
-            plot_div = plot(fig,
-                            output_type='div', 
-                            include_plotlyjs=False,
-                            show_link=False, 
-                            link_text="")
-                                
-            return render(request, 'keyword_analysis.html', {'title': 'keyword_analysis', 'form': form, 'plot_div': plot_div})
-    else:
-        form = KeywordAnalysisForm()
-        return render(request, 'keyword_analysis.html', {'title': 'keyword_analysis', 'form': form})
+    
+    return render(request, 'keyword_analysis.html')
 
 def word_cloud(request):
     if request.method == 'POST':

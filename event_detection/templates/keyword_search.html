@@ -67,23 +67,32 @@
     </div>
 </div>
 
-{% if keyword %}
+{% if keyword_obj_list %}
 <br>
 <table class="table table-bordered">
     <thead>
         <tr>
             <th scope="col">Number</th>
             <th scope="col">Keyword</th>
+            <th scope="col">Start date</th>
+            <th scope="col">End date</th>
         </tr>
     </thead>
     <tbody>
+        {% for keyword in keyword_obj_list %}
         <tr>
-            <th scope="row">1</th>
-            <td>{{keyword}}</td>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ keyword.keyword }}</td>
+            <td>{{ keyword.search_date }}</td>
+            <td>{{ keyword.end_date }}</td>
         </tr>
-
+        {% endfor %}
     </tbody>
 </table>
+
+<div>
+    <a class="btn btn-primary" role="button" href="{% url 'system_management'%}">Manage Keywords</a>
+</div>
 {% endif %}
 
 {% endblock %}
