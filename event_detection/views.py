@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import KeywordSearchForm, KeywordAnalysisForm, SelectTimeRangeForm
-from .twitter_utils import twitter_search, knowledge_extract
+from .utils import twitter_search, knowledge_extract
 from django.http import JsonResponse
 from .models import Keyword, Tweet
 from django.views.decorators.csrf import csrf_exempt
@@ -19,7 +19,7 @@ import threading
 from django.core import serializers
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from . import utils
+from .utils import utils
 
 
 # Create your views here.
