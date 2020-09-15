@@ -89,18 +89,17 @@ def analyse(request):
         tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
 
         if analyse_type == 'wordcloud':
-            text = " ".join([tweet.text for tweet in tweet_list])
-
-            wordcloud = WordCloud(stopwords=STOPWORDS, background_color="white", width=1200, height=700, collocations=False).generate(text)
-            wordcloud.to_file(f"event_detection/static/event_detection/{request.user.username}.png")
-
-            return JsonResponse({'wordcloud': f'event_detection/{request.user.username}.png'}, status=200)
+            img_path = utils.analyse_wordcloud(tweet_list, request)
+            return JsonResponse({'wordcloud': img_path}, status=200)
 
         elif analyse_type == 'n-grams':
-            text = " ".join([tweet.text for tweet in tweet_list])
-
-
-            return JsonResponse({'n-grams': f'event_detection/{request.user.username}.png'}, status=200)
+            one_gram_plot_div, two_gram_plot_div, thr_gram_plot_div = utils.analyse_ngrams(tweet_list)
+            return JsonResponse({
+                'one-grams': one_gram_plot_div, 
+                'two-grams': two_gram_plot_div, 
+                'thr-grams': thr_gram_plot_div, 
+                },
+                status=200)
 
         elif analyse_type == 'knowledgegraph':
 

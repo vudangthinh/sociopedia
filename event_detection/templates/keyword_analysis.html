@@ -21,7 +21,11 @@
                             var img_url = "{% static 'wordcloud' %}".replace(/wordcloud/, response["wordcloud"]);
                             $("div#analysis-div").html("<img src='" + img_url + "'/>");
                         } else if (analyse_type == "n-grams") {
-
+                            one_gram_plot_div = response["one-grams"];
+                            two_gram_plot_div = response["two-grams"];
+                            thr_gram_plot_div = response["thr-grams"];
+                            
+                            $("div#analysis-div").html(one_gram_plot_div + two_gram_plot_div + thr_gram_plot_div);
                         } else if (analyse_type == "knowledgegraph") {
 
                         }
@@ -83,16 +87,5 @@
         </div>
     </div>
 </div>
-<!-- <div id="wordcloud">
-
-</div>
-
-<div id="n-grams">
-
-</div>
-
-<div id="knowledge-graph">
-
-</div> -->
 
 {% endblock %}
