@@ -74,36 +74,39 @@ def search(request):
 @login_required
 def data_analysis(request, pk, start_date, end_date):
     print(pk, start_date, end_date)
-    tweet_list = utils.get_tweet_in_time_range(pk, start_date, end_date)
+    # tweet_list = utils.get_tweet_in_time_range(pk, start_date, end_date)
 
-    
-    return render(request, 'keyword_analysis.html')
+    return render(request, 'keyword_analysis.html', {"keyword_id": pk, "start_date": start_date, "end_date": end_date})
 
-def word_cloud(request):
-    if request.method == 'POST':
-        form = KeywordSearchForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
+@csrf_exempt
+def analyse(request):
+    if request.is_ajax and request.method == "POST":
+        keyword_id = request.POST.get('id', None)
+        start_date = request.POST.get('start_date', None)
+        end_date = request.POST.get('end_date', None)
+        analyse_type = request.POST.get('analyse_type')
+       
+        tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
 
-            if post.keyword.lower() == 'covid':
-                post.keyword = 'donald trump'
-            else:
-                post.keyword = 'covid'
-
-            keyword = Keyword.objects.filter(keyword=post.keyword.lower())[0]
-            result = keyword.tweets.all().values('text').order_by('?')[:10000]
-
-            text = ''
-            for tweet in result.iterator():
-                text += tweet['text'] + ' '
+        if analyse_type == 'wordcloud':
+            text = " ".join([tweet.text for tweet in tweet_list])
 
             wordcloud = WordCloud(stopwords=STOPWORDS, background_color="white", width=1200, height=700, collocations=False).generate(text)
             wordcloud.to_file(f"event_detection/static/event_detection/{request.user.username}.png")
-                                
-            return render(request, 'word_cloud.html', {'title': 'word_cloud', 'form': form, 'wordcloud': f'event_detection/{request.user.username}.png'})
-    else:
-        form = KeywordSearchForm()
-        return render(request, 'word_cloud.html', {'title': 'word_cloud', 'form': form})
+
+            return JsonResponse({'wordcloud': f'event_detection/{request.user.username}.png'}, status=200)
+
+        elif analyse_type == 'n-grams':
+            text = " ".join([tweet.text for tweet in tweet_list])
+
+
+            return JsonResponse({'n-grams': f'event_detection/{request.user.username}.png'}, status=200)
+
+        elif analyse_type == 'knowledgegraph':
+
+            return JsonResponse({'knowledgegraph': f'event_detection/{request.user.username}.png'}, status=200)
+        
+    return JsonResponse({"error": ""}, status=400)
 
 def knowledge_graph(request):
     if request.method == 'POST':

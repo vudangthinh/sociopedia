@@ -1,27 +1,51 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <head>
     <script>
         $(document).ready(function () {
+            function analyse(analyse_type) {
+                console.log('analyse');
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'analyse' %}",
+                    data: {
+                        "analyse_type": analyse_type,
+                        "id": "{{keyword_id}}",
+                        "start_date": "{{start_date}}",
+                        "end_date": "{{end_date}}"
+                    },
+                    success: function (response) {
+                        if (analyse_type == "wordcloud") {
+                            var img_url = "{% static 'wordcloud' %}".replace(/wordcloud/, response["wordcloud"]);
+                            $("div#analysis-div").html("<img src='" + img_url + "'/>");
+                        } else if (analyse_type == "n-grams") {
+
+                        } else if (analyse_type == "knowledgegraph") {
+
+                        }
+                        
+                    },
+                    error: function (response) {
+                        alert(response["responseJSON"]["error"]);
+                    }
+                });
+            }
+            
+            analyse("wordcloud");
             $("button#btn-wordcloud").click(function(){
-                // $.ajax({
-                //     type: 'POST',
-                //     url: "{% url 'filter_tweets_intime' %}",
-                //     data: { 
-                //         "page_n": 1,
-                //         "id": "{{keyword_id}}", 
-                //         "start_date": start_date, 
-                //         "end_date": end_date 
-                //     },
-                //     success: function (response) {
-                //         load_page(response);
-                //     },
-                //     error: function (response) {
-                //         alert(response["responseJSON"]["error"]);
-                //     }
-                // });
+                analyse("wordcloud");
             });
+            
+            $("button#btn-ngrams").click(function() {
+                analyse("n-grams");
+            });
+
+            $("button#btn-knowledgegraph").click(function() {
+                analyse("knowledgegraph");
+            });
+
         });
     </script>
 </head>
@@ -52,6 +76,13 @@
     <button type="button" id="btn-knowledgegraph" class="btn btn-secondary">KnowledgeGraph</button>
 </div>
 
+<div id="analysis-div">
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" style="width: 100px; height: 100px;">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+</div>
 <!-- <div id="wordcloud">
 
 </div>
