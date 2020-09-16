@@ -6,7 +6,8 @@ import plotly.graph_objs as go
 
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from ..models import Keyword, Tweet
+from event_detection.models import Keyword, Tweet
+from event_detection.utils import text_utils, knowledge_graph_extract
 from wordcloud import WordCloud, STOPWORDS
 
 import collections
@@ -157,7 +158,7 @@ def get_tweet_in_time_range(pk, start_date, end_date):
 def analyse_wordcloud(tweet_list, request):
     text = " ".join([tweet.text for tweet in tweet_list])
     stopwords = set(STOPWORDS)
-    stopwords.update(["https", "amp", "RT", "co"])
+    stopwords.update(["https", "amp", "RT", "co", "I"])
 
     wordcloud = WordCloud(stopwords=stopwords, background_color="white", width=1200, height=700, collocations=False).generate(text)
     wordcloud.to_file(f"event_detection/static/event_detection/{request.user.username}.png")
@@ -191,16 +192,16 @@ def ngrams_visualization(counter, ngrams):
 
 def analyse_ngrams(tweet_list):
     stopwords = set(STOPWORDS)
-    stopwords.update(["https", "amp", "RT", "co"])
+    stopwords.update(["https", "amp", "rt", "co", "i"])
 
-    text_list = []
+    tokens = []
     for tweet in tweet_list:
         text = tweet.text.translate(str.maketrans('', '', string.punctuation + "”’“…|"))
         # text = re.sub('[^a-zA-Z0-9]+', ' ', tweet.text) 
-        text = " ".join([word for word in text.split() if not word in stopwords])
-        text_list.append(text)
+        text = " ".join([word for word in text.split() if not word.lower() in stopwords])
+        tokens.extend(nltk.word_tokenize(text))
 
-    tokens = nltk.word_tokenize('. '.join(text_list))
+    # tokens = nltk.word_tokenize(' '.join(text_list))
     one_gram = ngrams(tokens, 1)
     one_gram_counter = collections.Counter(one_gram)
     one_gram_plot_div = ngrams_visualization(one_gram_counter, 1)
@@ -214,3 +215,10 @@ def analyse_ngrams(tweet_list):
     thr_gram_plot_div = ngrams_visualization(thr_gram_counter, 3)
 
     return one_gram_plot_div, two_gram_plot_div, thr_gram_plot_div
+
+def extract_knowledge_graph(tweet_list):
+    knowledge_graph_dict = knowledge_graph_extract.extract_triples(tweet_list)
+
+    return knowledge_graph_dict
+
+

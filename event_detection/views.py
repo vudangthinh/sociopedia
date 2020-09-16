@@ -102,8 +102,8 @@ def analyse(request):
                 status=200)
 
         elif analyse_type == 'knowledgegraph':
-
-            return JsonResponse({'knowledgegraph': f'event_detection/{request.user.username}.png'}, status=200)
+            knowledge_graph_dict = utils.extract_knowledge_graph(tweet_list)
+            return JsonResponse({'knowledgegraph': knowledge_graph_dict}, status=200)
         
     return JsonResponse({"error": ""}, status=400)
 
