@@ -3,6 +3,19 @@
 
 {% block content %}
 <head>
+    <script
+        type="text/javascript"
+        src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js">
+    </script>
+
+    <style type="text/css">
+        #knowledge-graph {
+        width: 1100px;
+        height: 700px;
+        border: 1px solid lightgray;
+        }
+    </style>
+
     <script>
         $(document).ready(function () {
             function analyse(analyse_type) {
@@ -20,14 +33,90 @@
                         if (analyse_type == "wordcloud") {
                             var img_url = "{% static 'wordcloud' %}".replace(/wordcloud/, response["wordcloud"]);
                             $("div#analysis-div").html("<img src='" + img_url + "'/>");
+
                         } else if (analyse_type == "n-grams") {
                             one_gram_plot_div = response["one-grams"];
                             two_gram_plot_div = response["two-grams"];
                             thr_gram_plot_div = response["thr-grams"];
                             
                             $("div#analysis-div").html(one_gram_plot_div + two_gram_plot_div + thr_gram_plot_div);
+
                         } else if (analyse_type == "knowledgegraph") {
-                            console.log(response["knowledgegraph"]);
+                            var knowledge_graph_dict = response["knowledgegraph"];
+                            $("div#analysis-div").html('');
+                            $("div#analysis-div").append('<div id="knowledge-graph"></div>')
+                            
+                            var node_list = [];
+                            var edge_list = [];
+                            var added_node = [];
+                            var added_edge = [];
+
+                            for (var key in knowledge_graph_dict){
+                                for (var i = 0; i < knowledge_graph_dict[key][1].length; i++){
+                                    triple = knowledge_graph_dict[key][1][i];
+                                    
+                                    if (!added_node.includes(triple[0])){
+                                        added_node.push(triple[0]);
+                                        node_list.push({id: triple[0], label:triple[0]});
+                                    }
+                                    if (!added_node.includes(triple[2])){
+                                        added_node.push(triple[2]);
+                                        node_list.push({id: triple[2], label:triple[2]});
+                                    }
+                                    
+                                    if (!added_edge.includes(triple[0] + " - " + triple[2])){
+                                        added_edge.push(triple[0] + " - " + triple[2]);
+                                        edge_list.push({ from: triple[0], to: triple[2], label: triple[1]});
+                                    }
+                                }
+                            }
+
+                            // create an array with nodes
+                            var nodes = new vis.DataSet(node_list);
+
+                            // create an array with edges
+                            var edges = new vis.DataSet(edge_list);
+
+                            // create a network
+                            var container = document.getElementById("knowledge-graph");
+                            var data = {
+                                nodes: nodes,
+                                edges: edges,
+                            };
+                            var options = {};
+                            var network = new vis.Network(container, data, options);
+                            
+
+                            $("div#analysis-div").append(`
+                                <table class="table" id="tweet-table">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Tweet</th>
+                                            <th scope="col">Subject</th>
+                                            <th scope="col">Predicate</th>
+                                            <th scope="col">Object</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            `);
+                            
+                            $.each(knowledge_graph_dict, function(key, val) {
+                                for(var i = 0; i < val[1].length; i++) {
+                                    $("#tweet-table tbody").append(
+                                        '<tr>' +
+                                            '<th scope="row">' + key + '</th>' +
+                                            '<td style="word-wrap: break-word">' + val[0] + '</td>' +
+                                            '<td>' + val[1][i][0] + '</td>' +
+                                            '<td>' + val[1][i][1] + '</td>' +
+                                            '<td>' + val[1][i][2] + '</td>' +
+                                        '</tr>'
+                                    );
+                                }
+                            });
+
                         }
                         
                     },
