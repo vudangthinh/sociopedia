@@ -44,6 +44,6 @@ def extract_triples(tweet_list):
         text = text_utils.pre_process(tweet.text)
         triple_list = extract_entity(text)
         if len(triple_list) > 0:
-            knowledge_graph_dict[tweet.tweet_id] = (tweet.text, triple_list)
+            knowledge_graph_dict[tweet.tweet_id] = (tweet.text, triple_list, tweet.created_at.strftime("%Y/%m/%d, %H:%M:%S"))
 
     return knowledge_graph_dict
