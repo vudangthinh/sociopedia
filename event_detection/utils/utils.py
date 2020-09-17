@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from plotly.offline import plot
 import plotly.graph_objs as go
+import plotly.express as px
 
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -17,22 +18,22 @@ import nltk
 from nltk.util import ngrams
 nltk.download('punkt')
 
-def plot_distribution(tweet_list, time_option="Option 1"):
+def plot_distribution(tweet_list, time_option="minute"):
     first_tweet = tweet_list.first()
     first_time = first_tweet.created_at.timestamp()
     last_tweet = tweet_list.last()
     last_time = last_tweet.created_at.timestamp()
     
     denominator = 60
-    if time_option == 'Option 1': # minute
+    if time_option == 'minute': # minute
         denominator = 60
-    elif time_option == 'Option 2': # hour
+    elif time_option == 'hour': # hour
         denominator = 60 * 60
-    elif time_option == 'Option 3': # day
+    elif time_option == 'day': # day
         denominator = 60 * 60 * 24
-    elif time_option == 'Option 4': # week
+    elif time_option == 'week': # week
         denominator = 60 * 60 * 24 * 7
-    elif time_option == 'Option 5': # month
+    elif time_option == 'month': # month
         denominator = 60 * 60 * 24 * 30
         
     time_range = int((last_time - first_time) / denominator)
@@ -56,7 +57,10 @@ def plot_distribution(tweet_list, time_option="Option 1"):
             y_data.append(0)
 
     fig = go.Figure()
-    bar = go.Bar(x=x_data_date, y=y_data)
+    if len(y_data) < 5:
+        bar = go.Bar(x=x_data_date, y=y_data)
+    else:
+        bar = go.Scatter(x=x_data_date, y=y_data)
     fig.add_trace(bar)
     fig.update_layout(
         xaxis=dict(
@@ -68,36 +72,7 @@ def plot_distribution(tweet_list, time_option="Option 1"):
         ),
         title='Tweets Distribution'
     )
-    # Add range slider
-    fig.update_layout(
-        xaxis=dict(
-            rangeselector=dict(
-                buttons=list([
-                    dict(count=1,
-                        label="1m",
-                        step="month",
-                        stepmode="backward"),
-                    dict(count=6,
-                        label="6m",
-                        step="month",
-                        stepmode="backward"),
-                    dict(count=1,
-                        label="YTD",
-                        step="year",
-                        stepmode="todate"),
-                    dict(count=1,
-                        label="1y",
-                        step="year",
-                        stepmode="backward"),
-                    dict(step="all")
-                ])
-            ),
-            rangeslider=dict(
-                visible=True
-            ),
-            type="date"
-        )
-    )
+    
 
     plot_div = plot(fig,
                     output_type='div', 

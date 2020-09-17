@@ -18,6 +18,41 @@
                 format: 'Y-m-d H:i'
             });
 
+            function load_tweet_distribution(time_option) {
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'load_tweet_dist' %}",
+                    data: {
+                        "time_option": time_option,
+                        "id": "{{keyword_id}}",
+                    },
+                    success: function (response) {
+                        $("div#tweet-distribution").html(response["plot_div"]);
+                    },
+                    error: function (response) {
+                        alert(response["responseJSON"]["error"]);
+                    }
+                });
+            }
+
+            load_tweet_distribution("minute");
+            $("button#btn-minute").click(function(){
+                // reset_loading();
+                load_tweet_distribution("minute");
+            });
+            
+            $("button#btn-hour").click(function() {
+                // reset_loading();
+                load_tweet_distribution("hour");
+            });
+
+            $("button#btn-day").click(function() {
+                // reset_loading();
+                load_tweet_distribution("day");
+            });
+
+
+
             var start_date = null;
             var end_date = null;
 
@@ -151,9 +186,14 @@
 
 {% if plot_div %}
 <h3>Tweets in time distribution:</h3>
+<div class="btn-group" role="group" aria-label="Basic example">
+    <button type="button" id="btn-minute" class="btn btn-secondary">By Minute</button>
+    <button type="button" id="btn-hour" class="btn btn-secondary">By Hour</button>
+    <button type="button" id="btn-day" class="btn btn-secondary">By Day</button>
+</div>
 <br />
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-12" id="tweet-distribution">
         <!-- {% autoescape off %} -->
         {{ plot_div|safe }}
         <!-- {% endautoescape %} -->

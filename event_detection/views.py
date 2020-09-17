@@ -199,6 +199,18 @@ def view_tweets(request, pk):
                                                 'form': form})
 
 @csrf_exempt
+def load_tweet_dist(request):
+    if request.is_ajax and request.method == "POST":
+        keyword_id = request.POST.get('id', None)
+        time_option = request.POST.get('time_option', 'minute')
+
+        tweet_list = Tweet.objects.filter(keyword=keyword_id)
+        plot_div = utils.plot_distribution(tweet_list, time_option=time_option)
+        return JsonResponse({'plot_div': plot_div}, status=200)
+
+    return JsonResponse({"error": ""}, status=400)
+
+@csrf_exempt
 def filter_tweets_intime(request):
     if request.is_ajax and request.method == "POST":
         keyword_id = request.POST.get('id', None)

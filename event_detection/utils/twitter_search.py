@@ -85,10 +85,11 @@ class StreamListener(tweepy.StreamListener):
 
     def on_error(self, status_code):
         print('Encountered streaming error (', status_code, ')')
-        if status_code == 420:
-            return False
-        else:
-            return True
+        return False
+        # if status_code == 420 or status_code == 401:
+        #     return False
+        # else:
+        #     return True
 
 def stream_search(keyword_obj_list):
     keywords = set()
@@ -107,6 +108,11 @@ def stream_search(keyword_obj_list):
     if used_token is None:
         return None
     
+    used_token.consumer_key = '9TvVKS8HRroMN4wQtBdzNA'
+    used_token.consumer_secret = 'BrmSzXi4sGzDiRdj7kbPHMRLQNMkbpHeDqtLhWPhU'
+    used_token.access_token = '1287392767-m7gcpy3wkpNpvMpywC9wwBTzIivWVXvLabhZMlA'
+    used_token.access_token_secret = 'RHNCzFoLOpUHZhLQu7mDkJGsgtA3xtpKm35596ZfuRY'
+
     auth = tweepy.OAuthHandler(used_token.consumer_key, used_token.consumer_secret)
     auth.set_access_token(used_token.access_token, used_token.access_token_secret)
 
