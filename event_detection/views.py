@@ -107,28 +107,28 @@ def analyse(request):
         
     return JsonResponse({"error": ""}, status=400)
 
-def knowledge_graph(request):
-    if request.method == 'POST':
-        form = KeywordSearchForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
+# def knowledge_graph(request):
+#     if request.method == 'POST':
+#         form = KeywordSearchForm(request.POST)
+#         if form.is_valid():
+#             post = form.save(commit=False)
             
-            if post.keyword.lower() == 'covid':
-                post.keyword = 'donald trump'
-            else:
-                post.keyword = 'covid'
+#             if post.keyword.lower() == 'covid':
+#                 post.keyword = 'donald trump'
+#             else:
+#                 post.keyword = 'covid'
 
-            keyword = Keyword.objects.filter(keyword=post.keyword.lower())[0]
-            result = keyword.tweets.all().values('text').order_by('?')[:100]
-            text_list = []
-            for tweet in result.iterator():
-                text_list.append(tweet['text'])
+#             keyword = Keyword.objects.filter(keyword=post.keyword.lower())[0]
+#             result = keyword.tweets.all().values('text').order_by('?')[:100]
+#             text_list = []
+#             for tweet in result.iterator():
+#                 text_list.append(tweet['text'])
 
-            plot_div = knowledge_extract.extract_knowledge_graph(text_list)          
-            return render(request, 'knowledge_graph.html', {'title': 'word_cloud', 'form': form, 'plot_div': plot_div})
-    else:
-        form = KeywordSearchForm()
-        return render(request, 'knowledge_graph.html', {'title': 'word_cloud', 'form': form})
+#             plot_div = knowledge_extract.extract_knowledge_graph(text_list)          
+#             return render(request, 'knowledge_graph.html', {'title': 'word_cloud', 'form': form, 'plot_div': plot_div})
+#     else:
+#         form = KeywordSearchForm()
+#         return render(request, 'knowledge_graph.html', {'title': 'word_cloud', 'form': form})
 
 @csrf_exempt
 def update_search_result(request):
@@ -172,7 +172,7 @@ def delete_keyword(request):
 @login_required
 def view_tweets(request, pk):
     tweet_list = Tweet.objects.filter(keyword=pk)
-    plot_div = utils.plot_distribution(tweet_list)
+    # plot_div = utils.plot_distribution(tweet_list)
 
     page = request.GET.get('page', 1)
     tweets, tweet_index, page_range = utils.paging_tweets(tweet_list, page)
@@ -195,7 +195,7 @@ def view_tweets(request, pk):
                                                 'page_settings': page_settings,
                                                 'tweet_index': tweet_index, 
                                                 'page_range': page_range,
-                                                'plot_div': plot_div,
+                                                # 'plot_div': plot_div,
                                                 'form': form})
 
 @csrf_exempt
