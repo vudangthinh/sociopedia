@@ -133,8 +133,16 @@
                 end_date = $("#id_end_date").val();
                 
                 var url = "{% url 'data_analysis' pk=keyword_id start_date='start_date_' end_date='end_date_' %}".replace(/keyword_id/, "{{keyword_id}}");
-                url = url.replace(/start_date_/, start_date);
-                url = url.replace(/end_date_/, end_date);
+                if (start_date) {
+                    url = url.replace(/start_date_/, start_date);
+                } else {
+                    url = url.replace(/start_date_/, "None");
+                }
+                if (end_date) {
+                    url = url.replace(/end_date_/, end_date);
+                } else {
+                    url = url.replace(/end_date_/, "None");
+                }
                 $("a#analyse-tweet").attr("href", url);
 
                 $.ajax({
