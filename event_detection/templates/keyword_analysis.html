@@ -126,7 +126,10 @@
                 });
             }
 
-            function reset_loading() {
+            function reset_loading(button) {
+                $(".btn-group > .btn").removeClass("active");
+                $(button).addClass("active");
+
                 $("div#analysis-div").html(`
                     <div class="d-flex justify-content-center">
                         <div class="spinner-border" style="width: 100px; height: 100px;">
@@ -138,17 +141,17 @@
             
             analyse("wordcloud");
             $("button#btn-wordcloud").click(function(){
-                reset_loading();
+                reset_loading(this);
                 analyse("wordcloud");
             });
             
             $("button#btn-ngrams").click(function() {
-                reset_loading();
+                reset_loading(this);
                 analyse("n-grams");
             });
 
             $("button#btn-knowledgegraph").click(function() {
-                reset_loading();
+                reset_loading(this);
                 analyse("knowledgegraph");
             });
 
@@ -233,9 +236,9 @@
 </div>
 
 <div class="btn-group" role="group" aria-label="Basic example">
-    <button type="button" id="btn-wordcloud" class="btn btn-secondary">Wordcloud</button>
-    <button type="button" id="btn-ngrams" class="btn btn-secondary">N-grams</button>
-    <button type="button" id="btn-knowledgegraph" class="btn btn-secondary">KnowledgeGraph</button>
+    <button type="button" id="btn-wordcloud" class="btn btn-outline-secondary">Wordcloud</button>
+    <button type="button" id="btn-ngrams" class="btn btn-outline-secondary">N-grams</button>
+    <button type="button" id="btn-knowledgegraph" class="btn btn-outline-secondary">KnowledgeGraph</button>
 </div>
 
 <div id="analysis-div">

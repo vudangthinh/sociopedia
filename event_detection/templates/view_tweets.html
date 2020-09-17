@@ -35,7 +35,9 @@
                 });
             }
 
-            function reset_loading() {
+            function reset_loading(button) {
+                $(".btn-group > .btn").removeClass("active");
+                $(button).addClass("active");
                 $("div#tweet-distribution").html(`
                     <div class="d-flex justify-content-center">
                         <div class="spinner-border" style="width: 100px; height: 100px;">
@@ -47,23 +49,23 @@
 
             load_tweet_distribution("minute");
             $("button#btn-minute").click(function(){
-                reset_loading();
+                reset_loading(this);
                 load_tweet_distribution("minute");
             });
             $("button#btn-hour").click(function() {
-                reset_loading();
+                reset_loading(this);
                 load_tweet_distribution("hour");
             });
             $("button#btn-day").click(function() {
-                reset_loading();
+                reset_loading(this);
                 load_tweet_distribution("day");
             });
             $("button#btn-week").click(function() {
-                reset_loading();
+                reset_loading(this);
                 load_tweet_distribution("week");
             });
             $("button#btn-month").click(function() {
-                reset_loading();
+                reset_loading(this);
                 load_tweet_distribution("month");
             });
 
@@ -209,11 +211,11 @@
 
 <h3>Tweets in time distribution:</h3>
 <div class="btn-group" role="group" aria-label="Basic example">
-    <button type="button" id="btn-minute" class="btn btn-secondary">By Minute</button>
-    <button type="button" id="btn-hour" class="btn btn-secondary">By Hour</button>
-    <button type="button" id="btn-day" class="btn btn-secondary">By Day</button>
-    <button type="button" id="btn-week" class="btn btn-secondary">By Week</button>
-    <button type="button" id="btn-month" class="btn btn-secondary">By Month</button>
+    <button type="button" id="btn-minute" class="btn btn-outline-secondary">By Minute</button>
+    <button type="button" id="btn-hour" class="btn btn-outline-secondary">By Hour</button>
+    <button type="button" id="btn-day" class="btn btn-outline-secondary">By Day</button>
+    <button type="button" id="btn-week" class="btn btn-outline-secondary">By Week</button>
+    <button type="button" id="btn-month" class="btn btn-outline-secondary">By Month</button>
 </div>
 <br />
 <div class="row">
