@@ -20,6 +20,7 @@ from django.core import serializers
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .utils import utils
+from event_detection.utils import dbpedia_query
 
 
 # Create your views here.
@@ -239,6 +240,18 @@ def filter_tweets_intime(request):
         tweets = serializers.serialize('json', tweets)
         
         return JsonResponse({"tweets": tweets, "tweet_index": tweet_index, "page_range": page_range, 'page_settings': page_settings}, status=200)
+
+    return JsonResponse({"error": ""}, status=400)
+
+@csrf_exempt
+def link_entity_dbpedia(request):
+    if request.is_ajax and request.method == "POST":
+        entity = request.POST.get('entity', None)
+        entity_type = request.POST.get('type', None)
+        
+        dbpedia_entity = dbpedia_query.link_entity(entity, entity_type)
+        
+        return JsonResponse({'dbpedia_entity': dbpedia_entity}, status=200)
 
     return JsonResponse({"error": ""}, status=400)
 

@@ -17,6 +17,7 @@ urlpatterns = [
     path('ajax/keyword', views.delete_keyword, name='delete_keyword'),
     path('ajax/filter_tweets_intime', views.filter_tweets_intime, name='filter_tweets_intime'),
     path('ajax/analyse', views.analyse, name='analyse'),
+    path('ajax/link_entity_dbpedia', views.link_entity_dbpedia, name='link_entity_dbpedia'),
 
     path('', views.home, name='home'),
     # path('home', views.home, name='home'),

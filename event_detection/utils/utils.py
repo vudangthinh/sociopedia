@@ -57,10 +57,10 @@ def plot_distribution(tweet_list, time_option="minute"):
             y_data.append(0)
 
     fig = go.Figure()
-    if len(y_data) < 5:
+    if len(y_data) < 2:
         bar = go.Bar(x=x_data_date, y=y_data)
     else:
-        bar = go.Scatter(x=x_data_date, y=y_data)
+        bar = go.Scatter(x=x_data_date, y=y_data, mode='lines+markers')
     fig.add_trace(bar)
     fig.update_layout(
         xaxis=dict(

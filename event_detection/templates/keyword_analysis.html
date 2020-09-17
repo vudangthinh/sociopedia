@@ -109,15 +109,14 @@
                                         '<tr>' +
                                             '<th scope="row">' + key + '</th>' +
                                             '<td style="word-wrap: break-word">' + val[0] + '</td>' +
-                                            '<td>' + val[1][i][0] + '</td>' +
+                                            '<td><button type="button" class="btn btn-light entity" id="' + val[1][i][3] + '" data-toggle="modal" data-target="#exampleModal">' + val[1][i][0] + '</button></td>' +
                                             '<td>' + val[1][i][1] + '</td>' +
-                                            '<td>' + val[1][i][2] + '</td>' +
+                                            '<td><button type="button" class="btn btn-light entity" id="' + val[1][i][4] + '" data-toggle="modal" data-target="#exampleModal">' + val[1][i][2] + '</button></td>' +
                                             '<td>' + val[2] + '</td>' +
                                         '</tr>'
                                     );
                                 }
                             });
-
                         }
                         
                     },
@@ -151,6 +150,62 @@
             $("button#btn-knowledgegraph").click(function() {
                 reset_loading();
                 analyse("knowledgegraph");
+            });
+
+            $('body').on('click', 'button.entity', function(e) {
+                var entity = $(this).text();
+                var type = $(this).attr('id');
+                
+                $("h5#exampleModalLabel").text(entity);
+                $("div#model-body").html(`
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border" style="width: 40px; height: 40px;">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                `);
+                
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'link_entity_dbpedia' %}",
+                    data: {
+                        "entity": entity,
+                        "type": type,
+                    },
+                    success: function (response) {
+                        if (Object.keys(response["dbpedia_entity"]).length == 0){
+                            $("div#model-body").html('<h6>Cannot find out any similar entity in DBpedia</h6>');
+                        } else {
+                            $("div#model-body").html('');
+                            $("div#model-body").append(`
+                                <table class="table" id="tweet-table">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">Entity Name</th>
+                                            <th scope="col">Entity Link</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            `);
+
+                            $.each(response["dbpedia_entity"], function (key, val) {
+
+                                $("div#model-body tbody").append(
+                                    '<tr>' +
+                                        '<th scope="row">' + val + '</th>' +
+                                        '<td><a target="_blank" rel="noopener noreferrer" href="' + key + '">View on DBpedia</a></td>' +
+                                    '</tr>'
+                                );
+                            });
+
+                        }
+                    },
+                    error: function (response) {
+                        alert(response["responseJSON"]["error"]);
+                    }
+                });
             });
 
         });
@@ -187,6 +242,30 @@
     <div class="d-flex justify-content-center">
         <div class="spinner-border" style="width: 100px; height: 100px;">
             <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Entity linking</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="model-body">
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" style="width: 40px; height: 40px;">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
