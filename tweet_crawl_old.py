@@ -45,18 +45,11 @@ class StreamListener(tweepy.StreamListener):
                 is_retweet = False
                 if hasattr(status, 'retweeted_status'):
                     is_retweet = True
-                    
-                    if hasattr(status.retweeted_status, 'extended_tweet'):
-                        text = status.retweeted_status.extended_tweet['full_text']
-                    else:
-                        text = status.retweeted_status.text
-                        
-                else:
-                    if hasattr(status, 'extended_tweet'):
-                        text = status.extended_tweet['full_text']
-                    else:
-                        text = status.text
 
+                if hasattr(status, 'extended_tweet'):
+                    text = status.extended_tweet['full_text']
+                else:
+                    text = status.text
 
                 is_quote = hasattr(status, "quoted_status")
                 quoted_text = ""

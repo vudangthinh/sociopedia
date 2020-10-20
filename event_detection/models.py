@@ -36,8 +36,10 @@ class Tweet(models.Model):
     created_at = models.DateTimeField()
     user_id = models.BigIntegerField()
     # user = models.CharField(max_length=50)
-    is_retweet = models.BooleanField(default=False)
-    is_quote = models.BooleanField(default=False)
+    # is_retweet = models.BooleanField(default=False)
+    # is_quote = models.BooleanField(default=False)
+    retweeted_id = models.BigIntegerField()
+    quoted_id = models.BigIntegerField()
     text = models.TextField()
     quoted_text = models.TextField()
 
@@ -47,3 +49,15 @@ class Tweet(models.Model):
     # def toJSON(self):
     #     return json.dumps(self, default=lambda o: o.__dict__, 
     #         sort_keys=True, indent=4)
+
+
+class Knowledge(models.Model):
+    tweet = models.ForeignKey('event_detection.Tweet', on_delete=models.CASCADE, related_name='knowledge')
+    k_subject = models.TextField()
+    k_predicate = models.TextField()
+    k_object = models.TextField()
+    subject_type = models.CharField(max_length=100, default='')
+    object_type = models.CharField(max_length=100, default='')
+
+    def __str__(self):
+        return ", ".join([self.k_subject, self.k_predicate, self.k_object, self.subject_type, self.object_type])

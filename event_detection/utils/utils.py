@@ -191,8 +191,43 @@ def analyse_ngrams(tweet_list):
 
     return one_gram_plot_div, two_gram_plot_div, thr_gram_plot_div
 
+def extract_and_save_knowledge_graph_all_tweets(tweet_list):
+    pass
+
 def extract_knowledge_graph(tweet_list):
-    knowledge_graph_dict = knowledge_graph_extract.extract_triples(tweet_list)
+    exist_ids = set()
+    new_tweet_list = []
+    for tweet in tweet_list:
+        tweet_id = tweet.tweet_id
+        retweeted_id = tweet.retweeted_id
+
+        if retweeted_id == 0:
+            if tweet_id not in exist_ids:
+                exist_ids.add(tweet_id)
+                new_tweet_list.append(tweet)
+        elif retweeted_id not in exist_ids:
+            exist_ids.add(retweeted_id)
+            new_tweet_list.append(tweet)
+        
+    knowledge_graph_dict = {}
+    c = 0
+    
+    for tweet in new_tweet_list:
+        knowledge_list = tweet.knowledge.all()
+        if knowledge_list is not None and len(knowledge_list) > 0:
+            c += 1
+            if c > 200: break
+            triple_list = []
+            for knowledge in knowledge_list:
+                triple_list.append((knowledge.k_subject, 
+                                    knowledge.k_predicate, 
+                                    knowledge.k_object, 
+                                    knowledge.subject_type, 
+                                    knowledge.object_type))
+            
+            knowledge_graph_dict[tweet.tweet_id] = (tweet.text, triple_list, tweet.created_at.strftime("%Y/%m/%d, %H:%M:%S"))
+
+    # knowledge_graph_dict = knowledge_graph_extract.extract_triples(tweet_list)
 
     return knowledge_graph_dict
 

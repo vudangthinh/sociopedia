@@ -3,13 +3,15 @@ import sys
 import time
 import tweepy
 import json
-from ..models import Tweet, Keyword, TwitterToken
+from event_detection.models import Tweet, Keyword, TwitterToken, Knowledge
 from queue import Queue
 from threading import Thread
 from tweepy.models import Status
 import dateutil.parser
 import time
 from django.utils import timezone
+from event_detection.utils import knowledge_graph_extract
+from django.utils.timezone import make_aware
 
 class StreamListener(tweepy.StreamListener):
     def __init__(self, keyword_obj_list, used_token, q=Queue()):
@@ -47,17 +49,29 @@ class StreamListener(tweepy.StreamListener):
                 status = Status.parse(self.api, data)
 
                 is_retweet = False
+                retweeted_id = 0
                 if hasattr(status, 'retweeted_status'):
                     is_retweet = True
+                    retweeted_id = status.retweeted_status.id
 
-                if hasattr(status, 'extended_tweet'):
-                    text = status.extended_tweet['full_text']
+                    if hasattr(status.retweeted_status, 'extended_tweet'):
+                        text = status.retweeted_status.extended_tweet['full_text']
+                    else:
+                        text = status.retweeted_status.text
+
                 else:
-                    text = status.text
+                    if hasattr(status, 'extended_tweet'):
+                        text = status.extended_tweet['full_text']
+                    else:
+                        text = status.text
+
 
                 is_quote = hasattr(status, "quoted_status")
                 quoted_text = ""
+                quoted_id = 0
                 if is_quote:
+                    quoted_id = status.quoted_status.id
+
                     if hasattr(status.quoted_status, "extended_tweet"):
                         quoted_text = status.quoted_status.extended_tweet["full_text"]
                     else:
@@ -67,14 +81,24 @@ class StreamListener(tweepy.StreamListener):
                     keyword = keyword_obj.keyword
 
                     if keyword.lower() in text.lower() or keyword.lower() in quoted_text.lower():
-                        Tweet.objects.create(keyword=keyword_obj,
+                        tweet_obj = Tweet.objects.create(keyword=keyword_obj,
                                             tweet_id=status.id,
-                                            created_at=status.created_at, 
+                                            created_at=make_aware(status.created_at), 
                                             user_id=status.user.id, 
-                                            is_retweet=is_retweet, 
-                                            is_quote=is_quote, 
+                                            retweeted_id=retweeted_id, 
+                                            quoted_id=quoted_id, 
                                             text=text, 
                                             quoted_text=quoted_text)
+
+                        triple_list = knowledge_graph_extract.extract_entity(text)
+                        for triple in triple_list:
+                            Knowledge.objects.create(tweet=tweet_obj,
+                                                    k_subject=triple[0],
+                                                    k_predicate=triple[1],
+                                                    k_object=triple[2], 
+                                                    subject_type=triple[3],
+                                                    object_type=triple[4])
+
 
             self.q.task_done()
 
