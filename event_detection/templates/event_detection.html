@@ -12,6 +12,92 @@
         }
     </style>
 
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'detect_event_ajax' %}",
+                data: {
+                    "id": "{{keyword_id}}",
+                    "start_date": "{{start_date}}",
+                    "end_date": "{{end_date}}"
+                },
+                success: function (response) {
+                    var plot_div = response["plot_div"];
+                    var event_plot_div = response["event_plot_div"];
+                    var events = response["events"];
+
+                    $("div#analysis-div").html('');
+                    $("div#analysis-div").append(
+                        '<div class="row">' +
+                            '<div class="col-md-12" id="tweet-distribution">' +
+                                plot_div + 
+                            '</div>' +
+                        '</div>' + 
+
+                        '<h3>Detect Events:</h3>' +
+                        '<div class="row">' +
+                            '<div class="col-md-12" id="tweet-distribution">' +
+                                event_plot_div +
+                            '</div>' +
+                        '</div>' +
+
+                        '<h3>Event List:</h3>' +
+
+                        '<table class="table" id="event-table">' +
+                            '<thead class="thead-dark">' +
+                                '<tr>' +
+                                    '<th scope="col">#</th>' +
+                                    '<th scope="col">Start time</th>' +
+                                    '<th scope="col">End time</th>' +
+                                    '<th scope="col">Knowledge</th>' +
+                                '</tr>' +
+                            '</thead>' +
+                            '<tbody>' +
+                            '</tbody>' +
+                        '</table>'
+                    );
+                    
+                    for(var i = 0; i < events.length; i++){
+                        event_url = "{% url 'event_knowledge' pk=keyword_id start_date='start_date' end_date='end_date' %}";
+                        event_url = event_url.replace(/start_date/, events[i][0]);
+                        event_url = event_url.replace(/end_date/, events[i][1]);
+                        console.log(event_url);
+                        $("#event-table tbody").append(
+                            '<tr>' +
+                                '<th scope="row">' + i + '</th>' +
+                                '<td>' + events[i][0] + '</td>' +
+                                '<td>' + events[i][1] + '</td>' +
+                                '<td><a class="btn btn-primary" role="button" href="' + event_url + '">View KG</a></td>' +
+                            '</tr>'
+                        );
+                    }
+                    
+                },
+                error: function (response) {
+                    alert(response["responseJSON"]["error"]);
+                }
+            });
+            
+
+            function reset_loading(button) {
+                $(".btn-group > .btn").removeClass("active");
+                $(button).addClass("active");
+
+                $("div#analysis-div").html(`
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border" style="width: 100px; height: 100px;">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                `);
+            }
+            
+
+            
+        });
+    </script>
+
 </head>
 
 <div class="font-up-bold text-uppercase">
@@ -35,7 +121,17 @@
 </div>
 
 <h3>Event Proportion:</h3>
-<div class="row">
+
+<div id="analysis-div">
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" style="width: 100px; height: 100px;">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+</div>
+
+
+<!-- <div class="row">
     <div class="col-md-12" id="tweet-distribution">
         {{ plot_div|safe }}
     </div>
@@ -48,5 +144,30 @@
     </div>
 </div>
 
+<h3>Event List:</h3>
+
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Start time</th>
+            <th scope="col">End time</th>
+            <th scope="col">Knowledge</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in events %}
+        <div>
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ event.0 }}</td>
+                <td>{{ event.1 }}</td>
+                <td><a class="btn btn-primary" role="button" href="{% url 'event_knowledge' pk=keyword_id start_date=event.0 end_date=event.1 %}">View KG</a></td>
+            </tr>
+        </div>
+        {% endfor %}
+
+    </tbody>
+</table> -->
 
 {% endblock %}

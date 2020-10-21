@@ -107,20 +107,60 @@ def analyse(request):
         
     return JsonResponse({"error": ""}, status=400)
 
-@csrf_exempt
+
 def detect_event(request, pk, start_date, end_date):
-    keyword = 'trump'
-    # tweet_list = utils.get_tweet_with_filter_key(pk, filter_key)
-    tweet_list = utils.get_tweet_in_time_range(pk, start_date, end_date)
-    time_option = 'minute'
-    x_data_date, y_data_event, y_data, y_proportion = event_detect.get_tweet_distribution_event(tweet_list, keyword, time_option)
-    plot_div = utils.plot_distribution_event(x_data_date, y_data_event, y_proportion)
+    return render(request, 'event_detection.html', {"keyword_id": pk, "start_date": start_date, "end_date": end_date})
 
-    burst_list, variables = event_detect.detect_event(y_data_event, y_data)
-    event_plot_div = utils.plot_burst_timeline(x_data_date, burst_list, variables)
+@csrf_exempt
+def detect_event_ajax(request):
+    if request.is_ajax and request.method == "POST":
+        print('##################################okkkkkkkkkkkkkkkkkkkk')
+        keyword_id = request.POST.get('id', None)
+        start_date = request.POST.get('start_date', None)
+        end_date = request.POST.get('end_date', None)
 
-    return render(request, 'event_detection.html', {"keyword_id": pk, 'plot_div': plot_div, 'event_plot_div': event_plot_div})
+        keyword = 'trump'
+        # tweet_list = utils.get_tweet_with_filter_key(pk, filter_key)
+        tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
+        time_option = 'minute'
+        x_data_date, y_data_event, y_data, y_proportion = event_detect.get_tweet_distribution_event(tweet_list, keyword, time_option)
+        plot_div = utils.plot_distribution_event(x_data_date, y_data_event, y_proportion)
 
+        burst_list, variables = event_detect.detect_event(y_data_event, y_data)
+        event_plot_div = utils.plot_burst_timeline(x_data_date, burst_list, variables)
+
+        events = []
+        bursts = burst_list[0]
+        for index, burst in bursts.iterrows():
+            start = burst['begin']
+            end = burst['end']
+
+            start_time = x_data_date[start].strftime("%Y-%m-%d %H:%M")
+            end_time = x_data_date[end].strftime("%Y-%m-%d %H:%M")
+            
+            events.append((start_time, end_time))
+
+        print('##################################okkkkkkkkkkkkkkkkkkkk')
+        return JsonResponse({'plot_div': plot_div, 'event_plot_div': event_plot_div, 'events': events}, status=200)
+
+    return JsonResponse({"error": ""}, status=400)
+
+def event_knowledge(request, pk, start_date, end_date):
+    return render(request, 'event_knowledge.html', {"keyword_id": pk, "start_date": start_date, "end_date": end_date})
+
+@csrf_exempt
+def event_knowledge_ajax(request):
+    if request.is_ajax and request.method == "POST":
+        keyword_id = request.POST.get('id', None)
+        start_date = request.POST.get('start_date', None)
+        end_date = request.POST.get('end_date', None)
+
+        tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
+        knowledge_graph_dict = utils.extract_knowledge_graph(tweet_list)
+
+        return JsonResponse({'knowledgegraph': knowledge_graph_dict}, status=200)
+
+    return JsonResponse({"error": ""}, status=400)
 
 # def knowledge_graph(request):
 #     if request.method == 'POST':

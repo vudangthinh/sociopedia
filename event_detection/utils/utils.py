@@ -82,8 +82,8 @@ def plot_burst_timeline(x_data_date, burst_list, variables):
         fig.add_trace(go.Scatter(x=x_data_date, y=[i] * len(x_data_date), mode='markers', marker=dict(size=5, color=1), name=label))
         for index, burst in bursts.iterrows():
             start = burst['begin']
-
             end = burst['end']
+            
             fig.add_trace(go.Scatter(x=[x_data_date[start],x_data_date[start],x_data_date[end],x_data_date[end],x_data_date[start]], 
                                     y=[i-0.2,i+0.2,i+0.2,i-0.2,i-0.2], 
                                     fill="toself",
