@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<head>
+
+    <style type="text/css">
+        #knowledge-graph {
+        width: 100%;
+        height: 700px;
+        border: 1px solid lightgray;
+        }
+    </style>
+
+</head>
+
+<div class="font-up-bold text-uppercase">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a class="" href="{% url 'system_management'%}">
+                    <h5 class="mr-3 mb-0"><strong>Keyword Management</strong></h5>
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="" href="{% url 'view_tweets' pk=keyword_id %}">
+                    <h5 class="mr-3 mb-0"><strong>View Tweets</strong></h5>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <h5 class="mr-3 mb-0"><strong>Event Detection</strong></h5>
+            </li>
+        </ol>
+    </nav>
+</div>
+
+<h3>Event Proportion:</h3>
+<div class="row">
+    <div class="col-md-12" id="tweet-distribution">
+        {{ plot_div|safe }}
+    </div>
+</div>
+
+<h3>Detect Events:</h3>
+<div class="row">
+    <div class="col-md-12" id="tweet-distribution">
+        {{ event_plot_div|safe }}
+    </div>
+</div>
+
+
+{% endblock %}

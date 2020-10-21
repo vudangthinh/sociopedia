@@ -3,12 +3,13 @@ from datetime import datetime, timedelta
 
 from plotly.offline import plot
 import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 import plotly.express as px
 
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from event_detection.models import Keyword, Tweet
-from event_detection.utils import text_utils, knowledge_graph_extract
+from event_detection.utils import text_utils, knowledge_graph_extract, event_detect
 from wordcloud import WordCloud, STOPWORDS
 
 import collections
@@ -19,42 +20,7 @@ from nltk.util import ngrams
 nltk.download('punkt')
 
 def plot_distribution(tweet_list, time_option="minute"):
-    first_tweet = tweet_list.first()
-    first_time = first_tweet.created_at.timestamp()
-    last_tweet = tweet_list.last()
-    last_time = last_tweet.created_at.timestamp()
-    
-    denominator = 60
-    if time_option == 'minute': # minute
-        denominator = 60
-    elif time_option == 'hour': # hour
-        denominator = 60 * 60
-    elif time_option == 'day': # day
-        denominator = 60 * 60 * 24
-    elif time_option == 'week': # week
-        denominator = 60 * 60 * 24 * 7
-    elif time_option == 'month': # month
-        denominator = 60 * 60 * 24 * 30
-        
-    time_range = int((last_time - first_time) / denominator)
-    if time_range < 1: 
-        time_range = 1
-    x_data = [i for i in range(time_range)]
-
-    counter = collections.Counter()
-    for tweet in tweet_list.iterator():
-        date_time = tweet.created_at.timestamp()
-        counter.update([int((date_time - first_time) / denominator)])
-    
-    y_data = []
-    x_data_date = []
-    for x in x_data:
-        date = datetime.fromtimestamp(x * denominator + first_time)
-        x_data_date.append(date)
-        if x in counter:
-            y_data.append(counter[x])
-        else:
-            y_data.append(0)
+    x_data, x_data_date, y_data = event_detect.get_tweet_distribution(tweet_list, time_option)
 
     fig = go.Figure()
     if len(y_data) < 2:
@@ -72,7 +38,58 @@ def plot_distribution(tweet_list, time_option="minute"):
         ),
         title='Tweets Distribution'
     )
-    
+
+    plot_div = plot(fig,
+                    output_type='div', 
+                    include_plotlyjs=False,
+                    show_link=False, 
+                    link_text="")
+
+    return plot_div
+
+def plot_distribution_event(x_data_date, y_data_event, y_proportion):    
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    bar_1 = go.Scatter(x=x_data_date, y=y_proportion, mode='lines', name="tweet proportion")
+    bar_2 = go.Scatter(x=x_data_date, y=y_data_event, mode='lines', name="number of tweets")
+    fig.add_trace(bar_1, secondary_y=False)
+    fig.add_trace(bar_2, secondary_y=True)
+
+    fig.update_layout(
+        xaxis=dict(
+            title='Time',
+            type='date'
+        ),
+        title='Tweets Distribution'
+    )
+
+    fig.update_yaxes(title_text="Tweet proportion", secondary_y=False)
+    fig.update_yaxes(title_text="Number of tweets", secondary_y=True)
+
+    plot_div = plot(fig,
+                    output_type='div', 
+                    include_plotlyjs=False,
+                    show_link=False, 
+                    link_text="")
+
+    return plot_div
+
+def plot_burst_timeline(x_data_date, burst_list, variables):
+    fig = go.Figure()
+
+    for i, bursts in enumerate(burst_list):
+        label = 's='+str(variables[i][0])+', g='+str(variables[i][1])
+        fig.add_trace(go.Scatter(x=x_data_date, y=[i] * len(x_data_date), mode='markers', marker=dict(size=5, color=1), name=label))
+        for index, burst in bursts.iterrows():
+            start = burst['begin']
+
+            end = burst['end']
+            fig.add_trace(go.Scatter(x=[x_data_date[start],x_data_date[start],x_data_date[end],x_data_date[end],x_data_date[start]], 
+                                    y=[i-0.2,i+0.2,i+0.2,i-0.2,i-0.2], 
+                                    fill="toself",
+                                    marker=dict(size=5, color=4),
+                                    marker_color='rgba(0, 0, 0, .8)',
+                                    showlegend=False))
 
     plot_div = plot(fig,
                     output_type='div', 
@@ -127,7 +144,11 @@ def get_tweet_in_time_range(pk, start_date, end_date):
     else:
         end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
 
-    tweet_list = Tweet.objects.filter(keyword=pk, created_at__range=[start_date, end_date])
+    tweet_list = Tweet.objects.filter(keyword=pk, created_at__range=[start_date, end_date]) #.values("text", "created_at")
+    return tweet_list
+
+def get_tweet_with_filter_key(pk, filter_key):
+    tweet_list = Tweet.objects.filter(keyword=pk, text__icontains=filter_key)
     return tweet_list
 
 def analyse_wordcloud(tweet_list, request):

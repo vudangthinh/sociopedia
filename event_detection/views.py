@@ -20,7 +20,7 @@ from django.core import serializers
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .utils import utils
-from event_detection.utils import dbpedia_query
+from event_detection.utils import dbpedia_query, event_detect
 
 
 # Create your views here.
@@ -74,7 +74,6 @@ def search(request):
 
 @login_required
 def data_analysis(request, pk, start_date, end_date):
-    print(pk, start_date, end_date)
     # tweet_list = utils.get_tweet_in_time_range(pk, start_date, end_date)
 
     return render(request, 'keyword_analysis.html', {"keyword_id": pk, "start_date": start_date, "end_date": end_date})
@@ -107,6 +106,21 @@ def analyse(request):
             return JsonResponse({'knowledgegraph': knowledge_graph_dict}, status=200)
         
     return JsonResponse({"error": ""}, status=400)
+
+@csrf_exempt
+def detect_event(request, pk, start_date, end_date):
+    keyword = 'trump'
+    # tweet_list = utils.get_tweet_with_filter_key(pk, filter_key)
+    tweet_list = utils.get_tweet_in_time_range(pk, start_date, end_date)
+    time_option = 'minute'
+    x_data_date, y_data_event, y_data, y_proportion = event_detect.get_tweet_distribution_event(tweet_list, keyword, time_option)
+    plot_div = utils.plot_distribution_event(x_data_date, y_data_event, y_proportion)
+
+    burst_list, variables = event_detect.detect_event(y_data_event, y_data)
+    event_plot_div = utils.plot_burst_timeline(x_data_date, burst_list, variables)
+
+    return render(request, 'event_detection.html', {"keyword_id": pk, 'plot_div': plot_div, 'event_plot_div': event_plot_div})
+
 
 # def knowledge_graph(request):
 #     if request.method == 'POST':
@@ -250,7 +264,7 @@ def link_entity_dbpedia(request):
         entity_type = request.POST.get('type', None)
         
         dbpedia_entity = dbpedia_query.link_entity(entity, entity_type)
-        
+
         return JsonResponse({'dbpedia_entity': dbpedia_entity}, status=200)
 
     return JsonResponse({"error": ""}, status=400)

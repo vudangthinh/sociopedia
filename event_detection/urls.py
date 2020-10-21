@@ -12,6 +12,7 @@ urlpatterns = [
     # path('knowledge_graph', views.knowledge_graph, name='knowledge_graph'),
     path('view_tweets/<int:pk>/', views.view_tweets, name='view_tweets'),
     path('data_analysis/<int:pk>/<str:start_date>/<str:end_date>/', views.data_analysis, name='data_analysis'),
+    path('detect_event/<int:pk>/<str:start_date>/<str:end_date>/', views.detect_event, name='detect_event'),
 
     path('ajax/keyword_search', views.load_tweet_dist, name='load_tweet_dist'),
     path('ajax/keyword', views.delete_keyword, name='delete_keyword'),

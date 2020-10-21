@@ -306,5 +306,7 @@
 
 <div>
     <a class="btn btn-primary" id="analyse-tweet" role="button" href="{% url 'data_analysis' pk=keyword_id start_date='None' end_date='None' %}">Analyse Tweets</a>
+    <a class="btn btn-primary" id="detect-event" role="button" href="{% url 'detect_event' pk=keyword_id start_date='None' end_date='None' %}">Detect Events</a>
+
 </div>
 {% endblock %}
