@@ -30,7 +30,7 @@ def get_tweet_distribution(tweet_list, time_option="minute", keyword=None):
 
     counter = collections.Counter()
     for tweet in tweet_list.iterator():
-        if keyword is None or keyword in tweet.text.lower(): 
+        if keyword is None or keyword.lower() in tweet.text.lower(): 
             date_time = tweet.created_at.timestamp()
             counter.update([int((date_time - first_time) / denominator)])
     
@@ -59,14 +59,17 @@ def get_tweet_distribution_event(tweet_list, keyword, time_option="minute"):
 def detect_event(r, d):
     r = pd.Series(np.array(r, dtype=float))
     d = pd.Series(np.array(d, dtype=float))
+
+    r = r.mask(r==0).fillna(1)
+    d = d.mask(d==0).fillna(1)
     n = len(r)
 
     # for test
-    d = pd.Series(np.floor(np.ones(n)*1500 + np.random.normal(scale=40, size=n)))
-    r = pd.Series(np.floor(np.ones(n)*20 + np.random.normal(scale=10, size=n)))
-    r[r<0] = 0
-    r[20:100] = r[20:100] + 30
-    r[160:200] = r[160:200] + 50
+    # d = pd.Series(np.floor(np.ones(n)*1500 + np.random.normal(scale=40, size=n)))
+    # r = pd.Series(np.floor(np.ones(n)*20 + np.random.normal(scale=10, size=n)))
+    # r[r<0] = 0
+    # r[20:100] = r[20:100] + 30
+    # r[160:200] = r[160:200] + 50
 
     
     variables = [[1.5, 1.0],

@@ -112,14 +112,33 @@ def detect_event(request, pk, start_date, end_date):
     return render(request, 'event_detection.html', {"keyword_id": pk, "start_date": start_date, "end_date": end_date})
 
 @csrf_exempt
-def detect_event_ajax(request):
+def load_keyword_ajax(request):
     if request.is_ajax and request.method == "POST":
-        print('##################################okkkkkkkkkkkkkkkkkkkk')
+        keywords = []
+
         keyword_id = request.POST.get('id', None)
         start_date = request.POST.get('start_date', None)
         end_date = request.POST.get('end_date', None)
 
-        keyword = 'trump'
+        tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
+        one_gram_counter, two_gram_counter, thr_gram_counter = utils.extract_ngrams(tweet_list)
+         
+        keywords.extend([' '.join(value[0]) for value in one_gram_counter.most_common()[:20]])
+        keywords.extend([' '.join(value[0]) for value in two_gram_counter.most_common()[:20]])
+        keywords.extend([' '.join(value[0]) for value in thr_gram_counter.most_common()[:20]])
+
+        return JsonResponse({'keywords': keywords}, status=200)
+
+    return JsonResponse({"error": ""}, status=400)
+
+@csrf_exempt
+def detect_event_ajax(request):
+    if request.is_ajax and request.method == "POST":
+        keyword_id = request.POST.get('id', None)
+        start_date = request.POST.get('start_date', None)
+        end_date = request.POST.get('end_date', None)
+        keyword = request.POST.get('filter_key', None)
+
         # tweet_list = utils.get_tweet_with_filter_key(pk, filter_key)
         tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
         time_option = 'minute'
@@ -140,7 +159,6 @@ def detect_event_ajax(request):
             
             events.append((start_time, end_time))
 
-        print('##################################okkkkkkkkkkkkkkkkkkkk')
         return JsonResponse({'plot_div': plot_div, 'event_plot_div': event_plot_div, 'events': events}, status=200)
 
     return JsonResponse({"error": ""}, status=400)

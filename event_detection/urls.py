@@ -22,6 +22,7 @@ urlpatterns = [
     path('ajax/link_entity_dbpedia', views.link_entity_dbpedia, name='link_entity_dbpedia'),
     path('ajax/detect_event_ajax', views.detect_event_ajax, name='detect_event_ajax'),
     path('ajax/event_knowledge_ajax', views.event_knowledge_ajax, name='event_knowledge_ajax'),
+    path('ajax/load_keyword_ajax', views.load_keyword_ajax, name='load_keyword_ajax'),
 
     path('', views.home, name='home'),
     # path('home', views.home, name='home'),

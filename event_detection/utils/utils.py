@@ -83,7 +83,7 @@ def plot_burst_timeline(x_data_date, burst_list, variables):
         for index, burst in bursts.iterrows():
             start = burst['begin']
             end = burst['end']
-            
+
             fig.add_trace(go.Scatter(x=[x_data_date[start],x_data_date[start],x_data_date[end],x_data_date[end],x_data_date[start]], 
                                     y=[i-0.2,i+0.2,i+0.2,i-0.2,i-0.2], 
                                     fill="toself",
@@ -186,7 +186,7 @@ def ngrams_visualization(counter, ngrams):
 
     return plot_div
 
-def analyse_ngrams(tweet_list):
+def extract_ngrams(tweet_list):
     stopwords = set(STOPWORDS)
     stopwords.update(["https", "amp", "rt", "co", "i"])
 
@@ -199,15 +199,19 @@ def analyse_ngrams(tweet_list):
 
     # tokens = nltk.word_tokenize(' '.join(text_list))
     one_gram = ngrams(tokens, 1)
-    one_gram_counter = collections.Counter(one_gram)
-    one_gram_plot_div = ngrams_visualization(one_gram_counter, 1)
-
     two_gram = ngrams(tokens, 2)
-    two_gram_counter = collections.Counter(two_gram)
-    two_gram_plot_div = ngrams_visualization(two_gram_counter, 2)
-
     thr_gram = ngrams(tokens, 3)
+    one_gram_counter = collections.Counter(one_gram)
+    two_gram_counter = collections.Counter(two_gram)
     thr_gram_counter = collections.Counter(thr_gram)
+
+    return one_gram_counter, two_gram_counter, thr_gram_counter
+
+def analyse_ngrams(tweet_list):
+    one_gram_counter, two_gram_counter, thr_gram_counter = extract_ngrams(tweet_list)
+
+    one_gram_plot_div = ngrams_visualization(one_gram_counter, 1)
+    two_gram_plot_div = ngrams_visualization(two_gram_counter, 2)
     thr_gram_plot_div = ngrams_visualization(thr_gram_counter, 3)
 
     return one_gram_plot_div, two_gram_plot_div, thr_gram_plot_div
