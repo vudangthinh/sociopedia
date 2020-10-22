@@ -60,10 +60,6 @@
                 reset_loading(this);
                 load_tweet_distribution("day");
             });
-            $("button#btn-week").click(function() {
-                reset_loading(this);
-                load_tweet_distribution("week");
-            });
             $("button#btn-month").click(function() {
                 reset_loading(this);
                 load_tweet_distribution("month");
@@ -214,7 +210,6 @@
     <button type="button" id="btn-minute" class="btn btn-outline-secondary active">By Minute</button>
     <button type="button" id="btn-hour" class="btn btn-outline-secondary">By Hour</button>
     <button type="button" id="btn-day" class="btn btn-outline-secondary">By Day</button>
-    <button type="button" id="btn-week" class="btn btn-outline-secondary">By Week</button>
     <button type="button" id="btn-month" class="btn btn-outline-secondary">By Month</button>
 </div>
 <br />

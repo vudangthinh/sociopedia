@@ -20,7 +20,7 @@ from nltk.util import ngrams
 nltk.download('punkt')
 
 def plot_distribution(tweet_list, time_option="minute"):
-    x_data, x_data_date, y_data = event_detect.get_tweet_distribution(tweet_list, time_option)
+    x_data_date, y_data = event_detect.get_tweet_distribution(tweet_list, time_option)
 
     fig = go.Figure()
     if len(y_data) < 2:
