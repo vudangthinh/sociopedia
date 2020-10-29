@@ -14,6 +14,7 @@ urlpatterns = [
     path('data_analysis/<int:pk>/<str:start_date>/<str:end_date>/', views.data_analysis, name='data_analysis'),
     path('detect_event/<int:pk>/<str:start_date>/<str:end_date>/', views.detect_event, name='detect_event'),
     path('event_knowledge/<int:pk>/<str:start_date>/<str:end_date>/', views.event_knowledge, name='event_knowledge'),
+    path('knowledge_graph_linking/<str:entity>/<str:knowledge_graph>/', views.knowledge_graph_linking, name='knowledge_graph_linking'),
 
     path('ajax/keyword_search', views.load_tweet_dist, name='load_tweet_dist'),
     path('ajax/keyword', views.delete_keyword, name='delete_keyword'),

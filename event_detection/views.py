@@ -21,7 +21,8 @@ from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .utils import utils
 from event_detection.utils import dbpedia_query, event_detect
-
+import base64
+import ast
 
 # Create your views here.
 
@@ -127,6 +128,9 @@ def load_keyword_ajax(request):
         keywords.extend([' '.join(value[0]) for value in two_gram_counter.most_common()[:20]])
         keywords.extend([' '.join(value[0]) for value in thr_gram_counter.most_common()[:20]])
 
+        dbpedia_keywords = utils.suggest_keyword_from_dbpedia(keyword_id)
+        keywords.extend(dbpedia_keywords)
+        
         return JsonResponse({'keywords': keywords}, status=200)
 
     return JsonResponse({"error": ""}, status=400)
@@ -141,7 +145,7 @@ def detect_event_ajax(request):
 
         # tweet_list = utils.get_tweet_with_filter_key(pk, filter_key)
         tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
-        time_option = 'minute'
+        time_option = 'hour'
         x_data_date, y_data_event, y_data, y_proportion = event_detect.get_tweet_distribution_event(tweet_list, keyword, time_option)
         plot_div = utils.plot_distribution_event(x_data_date, y_data_event, y_proportion)
 
@@ -153,9 +157,9 @@ def detect_event_ajax(request):
         for index, burst in bursts.iterrows():
             start = burst['begin']
             end = burst['end']
-
-            start_time = x_data_date[start].strftime("%Y-%m-%d %H:%M")
-            end_time = x_data_date[end].strftime("%Y-%m-%d %H:%M")
+            
+            start_time = x_data_date[start] #.strftime("%Y-%m-%d %H:%M")
+            end_time = x_data_date[end] #.strftime("%Y-%m-%d %H:%M")
             
             events.append((start_time, end_time))
 
@@ -179,6 +183,29 @@ def event_knowledge_ajax(request):
         return JsonResponse({'knowledgegraph': knowledge_graph_dict}, status=200)
 
     return JsonResponse({"error": ""}, status=400)
+
+def knowledge_graph_linking(request, entity, knowledge_graph):
+    base64_bytes = knowledge_graph.encode('utf-8')
+    message_bytes = base64.b64decode(base64_bytes)
+    keyword_extracted_graph = message_bytes.decode('utf-8')
+    keyword_extracted_graph = ast.literal_eval(keyword_extracted_graph)
+
+    keyword_dbpedia_graph = utils.get_keyword_dbpedia_graph(entity)
+    
+    keyword_knowledge_graph = []
+    for key, value in keyword_extracted_graph.items():
+        rel = "_".join(key.split("_")[:-1])
+        rel_type = key.split("_")[-1]
+        if 'tail' == rel_type:
+            keyword_knowledge_graph.append([entity, rel, value, 'extracted'])
+        elif 'head' == rel_type:
+            keyword_knowledge_graph.append([value, rel, entity, 'extracted'])
+
+    if keyword_dbpedia_graph is not None:
+        for key, value in keyword_dbpedia_graph.items():
+            keyword_knowledge_graph.append([entity, key, value, 'dbpedia'])
+
+    return render(request, 'knowledge_graph_linking.html', {"entity": entity, "knowledge_graph": keyword_knowledge_graph})
 
 # def knowledge_graph(request):
 #     if request.method == 'POST':

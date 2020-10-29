@@ -9,7 +9,7 @@ import plotly.express as px
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from event_detection.models import Keyword, Tweet
-from event_detection.utils import text_utils, knowledge_graph_extract, event_detect
+from event_detection.utils import text_utils, knowledge_graph_extract, event_detect, dbpedia_query
 from wordcloud import WordCloud, STOPWORDS
 
 import collections
@@ -151,6 +151,10 @@ def get_tweet_with_filter_key(pk, filter_key):
     tweet_list = Tweet.objects.filter(keyword=pk, text__icontains=filter_key)
     return tweet_list
 
+def get_keyword_by_id(pk):
+    keyword = Keyword.objects.get(pk=pk)
+    return keyword
+
 def analyse_wordcloud(tweet_list, request):
     text = " ".join([tweet.text for tweet in tweet_list])
     stopwords = set(STOPWORDS)
@@ -256,4 +260,24 @@ def extract_knowledge_graph(tweet_list):
 
     return knowledge_graph_dict
 
+def suggest_keyword_from_dbpedia(pk):
+    keyword = get_keyword_by_id(pk)
+    d = dbpedia_query.link_entity(keyword.keyword, None, limit=1)
+    related_keywords = []
+
+    for entity, name in d.items():
+        related_entity_dict = dbpedia_query.entity_relate_object(entity)
+
+        for predicate, object_value in related_entity_dict.items():
+            related_keywords.append(object_value)
+
+        return related_keywords    
+
+def get_keyword_dbpedia_graph(entity):
+    d = dbpedia_query.link_entity(entity, None, limit=1)
+
+    for entity, name in d.items():
+        related_entity_dict = dbpedia_query.entity_relate_object(entity)
+
+        return related_entity_dict 
 

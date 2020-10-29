@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
-import burst_detection as bd
+# import burst_detection as bd
+from event_detection.utils import burst_detection as bd
+from event_detection.utils import datetime_utils
 
 import collections
 from datetime import datetime, timedelta
@@ -58,7 +60,7 @@ def get_tweet_distribution(tweet_list, time_option="minute", keyword=None):
     for tweet in tweet_list.iterator():
         if keyword is None or keyword.lower() in tweet.text.lower(): 
             time = tweet.created_at.strftime("%Y-%m-%d %H:%M:%S")
-            time_short = time[:-pivot]
+            time_short = datetime_utils.correct_time(time[:-pivot])
             counter.update([time_short])
 
     counter_list = sorted(counter.items())
@@ -78,6 +80,7 @@ def get_tweet_distribution_event(tweet_list, keyword, time_option="minute"):
     return x_data_date_event, y_data_event, y_data, y_proportion
 
 def detect_event(r, d):
+
     r = pd.Series(np.array(r, dtype=float))
     d = pd.Series(np.array(d, dtype=float))
 
@@ -86,11 +89,10 @@ def detect_event(r, d):
     n = len(r)
 
     # for test
-    # d = pd.Series(np.floor(np.ones(n)*1500 + np.random.normal(scale=40, size=n)))
-    # r = pd.Series(np.floor(np.ones(n)*20 + np.random.normal(scale=10, size=n)))
-    # r[r<0] = 0
-    # r[20:100] = r[20:100] + 30
-    # r[160:200] = r[160:200] + 50
+    d = pd.Series(np.floor(np.ones(n)*1500 + np.random.normal(scale=40, size=n)))
+    r = pd.Series(np.floor(np.ones(n)*100 + np.random.normal(scale=10, size=n)))
+    r[r<0] = 0
+    r[1:3] = r[1:3] + 200
 
     
     variables = [[1.5, 1.0],
@@ -104,7 +106,7 @@ def detect_event(r, d):
 
     burst_list = []
     for v in variables:
-        q, _, _, p = bd.burst_detection(r, d, n, v[0], v[1], smooth_win=5)
+        q, _, _, p = bd.burst_detection(r, d, n, v[0], v[1], smooth_win=1)
 
         label = 's='+str(v[0])+', g='+str(v[1])
 

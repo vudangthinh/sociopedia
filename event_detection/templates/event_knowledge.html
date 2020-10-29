@@ -18,6 +18,7 @@
 
     <script>
         $(document).ready(function () {
+            var knowledge_graph_dict;
             function analyse(analyse_type) {
                 $.ajax({
                     type: 'POST',
@@ -29,7 +30,7 @@
                         "end_date": "{{end_date}}"
                     },
                     success: function (response) {
-                        var knowledge_graph_dict = response["knowledgegraph"];
+                        knowledge_graph_dict = response["knowledgegraph"];
                         $("div#analysis-div").html('');
                         $("div#analysis-div").append('<div id="knowledge-graph"></div>')
                         
@@ -118,57 +119,32 @@
             $('body').on('click', 'button.entity', function(e) {
                 var entity = $(this).text();
                 var type = $(this).attr('id');
-                
-                $("h5#exampleModalLabel").text(entity);
-                $("div#model-body").html(`
-                    <div class="d-flex justify-content-center">
-                        <div class="spinner-border" style="width: 40px; height: 40px;">
-                            <span class="sr-only">Loading...</span>
-                        </div>
-                    </div>
-                `);
-                
-                $.ajax({
-                    type: 'POST',
-                    url: "{% url 'link_entity_dbpedia' %}",
-                    data: {
-                        "entity": entity,
-                        "type": type,
-                    },
-                    success: function (response) {
-                        if (Object.keys(response["dbpedia_entity"]).length == 0){
-                            $("div#model-body").html('<h6>Cannot find out any similar entity in DBpedia</h6>');
-                        } else {
-                            $("div#model-body").html('');
-                            $("div#model-body").append(`
-                                <table class="table" id="tweet-table">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th scope="col">Entity Name</th>
-                                            <th scope="col">Entity Link</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
-                            `);
 
-                            $.each(response["dbpedia_entity"], function (key, val) {
+                var graph_dict = new Object();
+                for (var key in knowledge_graph_dict){
+                    for (var i = 0; i < knowledge_graph_dict[key][1].length; i++){
+                        triple = knowledge_graph_dict[key][1][i];
+                        head_entity = triple[0];
+                        tail_entity = triple[2];
+                        rel = triple[1];
 
-                                $("div#model-body tbody").append(
-                                    '<tr>' +
-                                        '<th scope="row">' + val + '</th>' +
-                                        '<td><a target="_blank" rel="noopener noreferrer" href="' + key + '">View on DBpedia</a></td>' +
-                                    '</tr>'
-                                );
-                            });
-
+                        if (head_entity == entity){
+                            graph_dict[rel.concat("_tail")] = tail_entity;
                         }
-                    },
-                    error: function (response) {
-                        alert(response["responseJSON"]["error"]);
+                        
+                        if (tail_entity == entity){
+                            graph_dict[rel.concat("_head")] = head_entity;
+                        }
                     }
-                });
+                }
+                
+                var obj_encode = btoa(unescape(encodeURIComponent(JSON.stringify(graph_dict))));
+
+                url = "{% url 'knowledge_graph_linking' entity='entity' knowledge_graph='obj_encode'%}";
+                url = url.replace(/entity/, entity);
+                url = url.replace(/obj_encode/, obj_encode);
+                window.location.href = url;
+
             });
 
         });
@@ -209,28 +185,5 @@
     </div>
 </div>
 
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Entity linking</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="model-body">
-                <div class="d-flex justify-content-center">
-                    <div class="spinner-border" style="width: 40px; height: 40px;">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 {% endblock %}
