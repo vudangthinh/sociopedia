@@ -20,7 +20,7 @@ from django.core import serializers
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .utils import utils
-from event_detection.utils import dbpedia_query, event_detect
+from event_detection.utils import dbpedia_query, event_detect, knowledge_graph_extract
 import base64
 import ast
 
@@ -129,9 +129,9 @@ def load_keyword_ajax(request):
         keywords.extend([' '.join(value[0]) for value in thr_gram_counter.most_common()[:20]])
 
         dbpedia_keywords = utils.suggest_keyword_from_dbpedia(keyword_id)
-        keywords.extend(dbpedia_keywords)
+        # keywords.extend(dbpedia_keywords)
         
-        return JsonResponse({'keywords': keywords}, status=200)
+        return JsonResponse({'keywords': keywords, 'dbpedia_keywords': dbpedia_keywords}, status=200)
 
     return JsonResponse({"error": ""}, status=400)
 
@@ -201,9 +201,12 @@ def knowledge_graph_linking(request, entity, knowledge_graph):
         elif 'head' == rel_type:
             keyword_knowledge_graph.append([value, rel, entity, 'extracted'])
 
+    keyword_knowledge_graph.append([entity, 'similar', entity + "_DBpedia", 'dbpedia'])
+    
     if keyword_dbpedia_graph is not None:
-        for key, value in keyword_dbpedia_graph.items():
-            keyword_knowledge_graph.append([entity, key, value, 'dbpedia'])
+        keyword_knowledge_graph.extend(keyword_dbpedia_graph)
+        # for key, value in keyword_dbpedia_graph.items():
+        #     keyword_knowledge_graph.append([entity + "_DBpedia", key, value, 'dbpedia'])
 
     return render(request, 'knowledge_graph_linking.html', {"entity": entity, "knowledge_graph": keyword_knowledge_graph})
 
@@ -351,6 +354,16 @@ def link_entity_dbpedia(request):
         dbpedia_entity = dbpedia_query.link_entity(entity, entity_type)
 
         return JsonResponse({'dbpedia_entity': dbpedia_entity}, status=200)
+
+    return JsonResponse({"error": ""}, status=400)
+
+@csrf_exempt
+def question_answering_ajax(request):
+    if request.is_ajax and request.method == "POST":
+        question = request.POST.get('question', None)
+        entities, relations = knowledge_graph_extract.extract_entity_question(question)
+
+        return JsonResponse({'entities': entities, 'relations': relations}, status=200)
 
     return JsonResponse({"error": ""}, status=400)
 

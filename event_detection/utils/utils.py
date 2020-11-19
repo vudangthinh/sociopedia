@@ -277,7 +277,7 @@ def get_keyword_dbpedia_graph(entity):
     d = dbpedia_query.link_entity(entity, None, limit=1)
 
     for entity, name in d.items():
-        related_entity_dict = dbpedia_query.entity_relate_object(entity)
+        related_entity_graph = dbpedia_query.entity_relate_object_two_level(entity)
 
-        return related_entity_dict 
+        return related_entity_graph 
 

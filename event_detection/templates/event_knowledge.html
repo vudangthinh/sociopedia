@@ -76,7 +76,10 @@
                         
 
                         $("div#analysis-div").append(`
-                            <table class="table" id="tweet-table">
+                            <br/>
+                            <button type="button" class="btn btn-dark" id="tweet-table-button">Show extracted knowledge table</button>
+
+                            <table class="table" id="tweet-table" style="display:none;">
                                 <thead class="thead-dark">
                                     <tr>
                                         <th scope="col">ID</th>
@@ -90,6 +93,21 @@
                                 <tbody>
                                 </tbody>
                             </table>
+
+                            <br/><br/>
+                            <hr/>
+                            <h3>Use Cases</h3>
+                            <br/>
+
+                            <h4>Question answering:</h4>
+                            <div class="input-group mb-3">
+                                <input type="text" id="question-input" class="form-control" placeholder="Enter your question" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="view-answer-button">View Answer</button>
+                                </div>
+                            </div>
+                            <div id="answer-div">
+                            </div>
                         `);
                         
                         $.each(knowledge_graph_dict, function(key, val) {
@@ -106,6 +124,11 @@
                                 );
                             }
                         });
+
+                        $("#tweet-table-button").click(function(){
+                            $("#tweet-table").slideToggle("slow");
+                        });
+                        
                         
                     },
                     error: function (response) {
@@ -147,6 +170,80 @@
 
             });
 
+            $('body').on('click', 'button#view-answer-button', function(e) {
+                var question = $("#question-input").val();
+                console.log(question);
+
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'question_answering_ajax' %}",
+                    data: {
+                        "question": question,
+                    },
+                    success: function (response) {
+                        var entities = response["entities"];
+                        var relations = response["relations"];
+                        console.log(entities);
+                        console.log(relations);
+                        var answer = "No answer found. Please enter another question.";
+                        var related_tweet = "";
+                        var is_break = false;
+                        
+                        for (var key in knowledge_graph_dict){
+                            for (var i = 0; i < knowledge_graph_dict[key][1].length; i++){
+
+                                var triple = knowledge_graph_dict[key][1][i];
+                                var head_entity = triple[0];
+                                var tail_entity = triple[2];
+                                var rel = triple[1];
+                                console.log(triple)
+                                
+                                var match_head_entity = false;
+                                var match_tail_entity = false;
+                                var match_relation = false;
+                                for (entity of entities){
+                                    if (head_entity.toLowerCase().includes(entity.toLowerCase())){
+                                        match_head_entity = true;
+                                    }
+                                    if (tail_entity.toLowerCase().includes(entity.toLowerCase())){
+                                        match_tail_entity = true;
+                                    }
+                                }
+
+                                for (relation of relations){
+                                    if (rel.toLowerCase().includes(relation.toLowerCase())){
+                                        match_relation = true;
+                                    }
+                                }
+
+                                if ((match_head_entity || match_tail_entity) && match_relation){
+                                    related_tweet = knowledge_graph_dict[key][0];
+                                    if (match_head_entity){
+                                        answer = tail_entity;
+                                    } else {
+                                        answer = head_entity;
+                                    }
+                                    is_break = true;
+                                }
+                                
+                                if (is_break) {
+                                    break;
+                                }
+                            }
+                            if (is_break) {
+                                break;
+                            }
+                        }
+
+                        $("#answer-div").html('');
+                        $("#answer-div").append(
+                            '<p><strong>Answer:</strong> ' + answer + '</p>' + 
+                            '<p><strong>Answer is extracted from tweet:</strong> ' + related_tweet + '</p>'
+                            );
+                    }
+                });
+            });
+
         });
     </script>
 </head>
@@ -176,7 +273,7 @@
     </nav>
 </div>
 
-
+<h3>Event knowledge graph</h3>
 <div id="analysis-div">
     <div class="d-flex justify-content-center">
         <div class="spinner-border" style="width: 100px; height: 100px;">

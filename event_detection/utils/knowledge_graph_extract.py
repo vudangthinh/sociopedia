@@ -39,6 +39,22 @@ def extract_entity(text):
             
     return triple_list
 
+def extract_entity_question(question):
+    doc = nlp(question.strip().strip('?'))
+
+    entities = []
+    relations = []
+    for tok in doc:
+        if 'ubj' in tok.dep_ or 'obj' in tok.dep_:
+            entity = tok.text
+            entities.append(entity)
+                
+        if tok.dep_ == 'ROOT' or tok.pos_ == 'VERB':
+            relation = str(tok.text)
+            relations.append(relation)
+    
+    return entities, relations
+
 def extract_triples(tweet_list):
     knowledge_graph_dict = {}
     for tweet in tweet_list:

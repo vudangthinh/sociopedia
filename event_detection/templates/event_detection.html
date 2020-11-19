@@ -28,16 +28,27 @@
                     },
                     success: function (response) {
                         var keywords = response["keywords"];
+                        var dbpedia_keywords = response["dbpedia_keywords"];
 
                         $("div#analysis-div").html('');
                         $("div#analysis-div").append(
-                            '<ul class="cloud-tags">' + 
+                            '<h5>Suggest extracted keywords:</h5>' +
+                            '<ul class="cloud-tags" id="cloudtags1">' + 
+                            '</ul>' +
+                            '<h5>Suggest DBpedia keywords:</h5>' +
+                            '<ul class="cloud-tags" id="cloudtags2">' + 
                             '</ul>'
                         );
 
                         for(var i = 0; i < keywords.length; i++){
-                            $("ul.cloud-tags").append(
+                            $("ul#cloudtags1").append(
                                 '<li><a href="" class="keyword-filter" id="' + keywords[i] + '">' + keywords[i] + '</a></li>'
+                            );
+                        };
+
+                        for(var i = 0; i < dbpedia_keywords.length; i++){
+                            $("ul#cloudtags2").append(
+                                '<li><a href="" class="keyword-filter" id="' + dbpedia_keywords[i] + '">' + dbpedia_keywords[i] + '</a></li>'
                             );
                         };
 
@@ -168,7 +179,7 @@
     </nav>
 </div>
 
-<h3>Select keyword:</h3>
+<h3>Select a keyword:</h3>
 
 <div id="analysis-div">
     <div class="d-flex justify-content-center">
