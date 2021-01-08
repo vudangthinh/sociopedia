@@ -45,7 +45,7 @@ def pre_process(text):
     text = remove_url(text)
     text = remove_email(text)
     text = remove_mention(text)
-    text = remove_number(text)
+    # text = remove_number(text)
     text = remove_hashtag(text)
     
     return ' '.join(text.split())

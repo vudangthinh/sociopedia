@@ -10,7 +10,7 @@ from tweepy.models import Status
 import dateutil.parser
 import time
 from django.utils import timezone
-from event_detection.utils import knowledge_graph_extract
+from event_detection.utils import knowledge_graph_extract, text_utils
 from django.utils.timezone import make_aware
 
 class StreamListener(tweepy.StreamListener):
@@ -90,7 +90,7 @@ class StreamListener(tweepy.StreamListener):
                                             text=text, 
                                             quoted_text=quoted_text)
 
-                        triple_list = knowledge_graph_extract.extract_entity(text)
+                        triple_list = knowledge_graph_extract.extract_entity(text_utils.pre_process(text))
                         for triple in triple_list:
                             Knowledge.objects.create(tweet=tweet_obj,
                                                     k_subject=triple[0],

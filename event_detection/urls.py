@@ -1,5 +1,12 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+from rest_framework import routers
+from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.authtoken.models import Token
+
+
+# router = routers.DefaultRouter()
+# router.register(r'keywords', views.KeywordViewSet)
 
 urlpatterns = [
     path('signup', views.signup, name='signup'),
@@ -29,4 +36,15 @@ urlpatterns = [
     path('', views.home, name='home'),
     # path('home', views.home, name='home'),
     path('about', views.about, name='about'),
+
+    ### API
+    # path('sociopedia/', include(router.urls)),
+    # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
+    path('keywords/', views.KeywordList.as_view(), name='keyword_list'),
+    path('tweet_list/', views.TweetList.as_view(), name='tweet_list'),
+    path('topic_list/', views.TopicList.as_view(), name='topic_list'),
+    path('event_list/', views.EventList.as_view(), name='event_list'),
+    path('event_knowledge_list/', views.EventKnowledgeList.as_view(), name='event_knowledge_list'),
+    path('linking_knowledge/', views.LinkingKnowledge.as_view(), name='linking_knowledge'),
 ]

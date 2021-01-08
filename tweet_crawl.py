@@ -43,9 +43,11 @@ class StreamListener(tweepy.StreamListener):
                 status = Status.parse(self.api, data)
 
                 is_retweet = False
+                retweeted_id = 0
                 if hasattr(status, 'retweeted_status'):
                     is_retweet = True
-                    
+                    retweeted_id = status.retweeted_status.id
+
                     if hasattr(status.retweeted_status, 'extended_tweet'):
                         text = status.retweeted_status.extended_tweet['full_text']
                     else:
@@ -60,7 +62,10 @@ class StreamListener(tweepy.StreamListener):
 
                 is_quote = hasattr(status, "quoted_status")
                 quoted_text = ""
+                quoted_id = 0
                 if is_quote:
+                    quoted_id = status.quoted_status.id
+
                     # check if quoted tweet's text has been truncated before recording it
                     if hasattr(status.quoted_status, "extended_tweet"):
                         quoted_text = status.quoted_status.extended_tweet["full_text"]
@@ -75,7 +80,7 @@ class StreamListener(tweepy.StreamListener):
 
                 # Tweet.objects.create(status.track, status.created_at, status.user.screen_name, is_retweet, is_quote, text, quoted_text).save()
                 self.writer.write("%s,%s,%s,%s,%s,%s,%s,%s\n" % (status.id_str, status.created_at,
-                                                                status.user.id_str, status.user.screen_name, is_retweet, is_quote, text, quoted_text))
+                                                                status.user.id_str, status.user.screen_name, retweeted_id, quoted_id, text, quoted_text))
 
             self.q.task_done()
 
@@ -132,7 +137,7 @@ if __name__ == "__main__":
     writer = open(os.path.join("/data_hdd/socioscope/data",
                                'tweets.csv'), "w", encoding='utf-8')
     writer.write(
-        "tweet_id,date,user_id,user,is_retweet,is_quote,text,quoted_text\n")
+        "tweet_id,date,user_id,user,retweeted_id,quoted_id,text,quoted_text\n")
 
     isexcept = True
     while isexcept:

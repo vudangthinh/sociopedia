@@ -1,10 +1,14 @@
 import sys
+import os, django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "socioscope.settings")
+django.setup()
 sys.path.append('/data/django/socioscope/event_detection')
-import os
 import pandas as pd
-from models import Tweet
+from event_detection.models import Tweet, Keyword, Knowledge
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import is_aware, make_aware
+from event_detection.utils import knowledge_graph_extract, text_utils
+
 
 def import_tweets(input_file):
     df = pd.read_csv(input_file)
@@ -25,8 +29,34 @@ def import_tweets(input_file):
 
         tweet.save()
 
+def import_tweets_of_keyword(keyword_str, input_file):
+    keyword_obj = Keyword.objects.filter(keyword=keyword_str)[0]
+    print(keyword_obj)
+    with open(input_file) as file:
+        for line in file:
+            line_arr = line.split(',')
+            if len(line_arr) == 8:
+                tweet_obj = Tweet.objects.create(keyword=keyword_obj,
+                                                tweet_id=int(line_arr[0]),
+                                                created_at=make_aware(parse_datetime(line_arr[1])), 
+                                                user_id=int(line_arr[2]), 
+                                                retweeted_id=int(line[4]), 
+                                                quoted_id=int(line[5]), 
+                                                text=line_arr[6], 
+                                                quoted_text=line_arr[7])
+
+                triple_list = knowledge_graph_extract.extract_entity(text_utils.pre_process(line_arr[6]))
+                for triple in triple_list:
+                    Knowledge.objects.create(tweet=tweet_obj,
+                                            k_subject=triple[0],
+                                            k_predicate=triple[1],
+                                            k_object=triple[2], 
+                                            subject_type=triple[3],
+                                            object_type=triple[4])
+                                            
 if __name__ == "__main__":
-    import_tweets('/data_hdd/socioscope/data/tweets.csv.v1')
+    # import_tweets('/data_hdd/socioscope/data/tweets.csv.v1')
+    import_tweets_of_keyword("Covid", "/data_hdd/socioscope/data/covid_test_import.csv")
 
 
 # tweet_list = [] 

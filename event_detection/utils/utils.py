@@ -230,7 +230,7 @@ def extract_knowledge_graph(tweet_list):
         tweet_id = tweet.tweet_id
         retweeted_id = tweet.retweeted_id
 
-        if retweeted_id == 0:
+        if retweeted_id == 0 or retweeted_id == 1: #0 means not retweet, 1 means retweet
             if tweet_id not in exist_ids:
                 exist_ids.add(tweet_id)
                 new_tweet_list.append(tweet)
@@ -275,9 +275,10 @@ def suggest_keyword_from_dbpedia(pk):
 
 def get_keyword_dbpedia_graph(entity):
     d = dbpedia_query.link_entity(entity, None, limit=1)
-
+    
     for entity, name in d.items():
-        related_entity_graph = dbpedia_query.entity_relate_object_two_level(entity)
+        # related_entity_graph = dbpedia_query.entity_relate_object_two_level(entity)
+        related_entity_graph = dbpedia_query.entity_relate_object(entity)
 
         return related_entity_graph 
 
