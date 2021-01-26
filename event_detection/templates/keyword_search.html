@@ -1,28 +1,5 @@
 {% extends 'base.html' %}
 
-<!-- <script>
-        $(document).ready(function() {
-            $('#search-form').on('submit', function(event) {
-                var keyword = $("#id_keyword").val();
-                
-                $.ajax({
-                    method: 'POST',
-                    url: '/update_search_result',
-                    data: {'keyword': keyword},
-                    dataType: 'json',
-                    success: function(response){
-                        console.log(response.tweets);
-                        alert(response.tweets)
-                        $("#tweets").text(response.tweets);
-                    },
-                    error: function(response) {
-                        console.log(response)
-                    }
-                });
-            });
-        });
-    </script> -->
-
 {% block content %}
 
 <head>
@@ -67,6 +44,16 @@
     </div>
 </div>
 
+
+{% if is_error %}
+<br>
+<div>
+    <h4>Streaming Error:</h4>
+    <p>There is not enough token for streaming data from Twitter. Please wait until there is a token available.</p>
+</div>
+
+{% else %}
+
 {% if keyword_obj_list %}
 <br>
 <table class="table table-bordered">
@@ -93,6 +80,7 @@
 <div>
     <a class="btn btn-primary" role="button" href="{% url 'system_management'%}">Manage Keywords</a>
 </div>
+{% endif %}
 {% endif %}
 
 {% endblock %}

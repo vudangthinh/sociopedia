@@ -27,17 +27,16 @@ class StreamListener(tweepy.StreamListener):
         self.used_token = used_token
         self.keyword_obj_list = keyword_obj_list
         self.end_date = self.keyword_obj_list[0].end_date
-        self.start_time = int(time.time())
+        self.is_continue = True
 
     def on_data(self, raw_data):
         self.q.put(raw_data)
 
-        if timezone.now() < self.end_date:
-            return True
-        else:
-            self.used_token.used_count -= 1
-            self.used_token.save()
-            return False
+        # Check streaming every 15 seconds
+        if int(time.time()) % 15 == 0:
+            self.is_continue = self.stop_streaming()
+
+        return self.is_continue
 
     def save_tweets(self):
         while True:
@@ -107,8 +106,51 @@ class StreamListener(tweepy.StreamListener):
     #     time.sleep(5 * 60)
     #     return True
 
+    def stop_streaming(self):        
+        id_list = []
+        
+        for keyword_obj in self.keyword_obj_list:
+            id_list.append(keyword_obj.id)
+
+        new_keyword_list = Keyword.objects.filter(pk__in=id_list)
+
+        # stop streaming if user force stop
+        stop_stream = False
+        for keyword_obj in new_keyword_list:
+            if keyword_obj.is_forced_stop:
+                stop_stream = True
+                break
+        
+        if stop_stream:
+            for keyword_obj in new_keyword_list:
+                keyword_obj.is_streaming = False
+                keyword_obj.save()
+                
+            self.used_token.used_count -= 1
+            self.used_token.save()
+            return False
+        else:
+            return True
+
+        # stop streaming if timeout
+        if timezone.now() < self.end_date:
+            return True
+        else:
+            for keyword_obj in new_keyword_list:
+                keyword_obj.is_streaming = False
+                keyword_obj.save()
+
+            self.used_token.used_count -= 1
+            self.used_token.save()
+            return False
+
     def on_error(self, status_code):
         print('Encountered streaming error (', status_code, ')')
+        for keyword_obj in self.keyword_obj_list:
+            keyword_obj.is_streaming = False
+            keyword_obj.error_code = status_code
+            keyword_obj.save()
+
         return False
         # if status_code == 420 or status_code == 401:
         #     return False
@@ -130,12 +172,14 @@ def stream_search(keyword_obj_list):
             break
     
     if used_token is None:
-        return None
+        used_token = tokens[0]
+        used_token.used_count += 1
+        used_token.save()
     
-    used_token.consumer_key = '9TvVKS8HRroMN4wQtBdzNA'
-    used_token.consumer_secret = 'BrmSzXi4sGzDiRdj7kbPHMRLQNMkbpHeDqtLhWPhU'
-    used_token.access_token = '1287392767-m7gcpy3wkpNpvMpywC9wwBTzIivWVXvLabhZMlA'
-    used_token.access_token_secret = 'RHNCzFoLOpUHZhLQu7mDkJGsgtA3xtpKm35596ZfuRY'
+    # used_token.consumer_key = '9TvVKS8HRroMN4wQtBdzNA'
+    # used_token.consumer_secret = 'BrmSzXi4sGzDiRdj7kbPHMRLQNMkbpHeDqtLhWPhU'
+    # used_token.access_token = '1287392767-m7gcpy3wkpNpvMpywC9wwBTzIivWVXvLabhZMlA'
+    # used_token.access_token_secret = 'RHNCzFoLOpUHZhLQu7mDkJGsgtA3xtpKm35596ZfuRY'
 
     auth = tweepy.OAuthHandler(used_token.consumer_key, used_token.consumer_secret)
     auth.set_access_token(used_token.access_token, used_token.access_token_secret)

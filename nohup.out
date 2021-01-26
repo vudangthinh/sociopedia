@@ -1,0 +1,11 @@
+Second exception: ('Connection broken: IncompleteRead(34 bytes read)', IncompleteRead(34 bytes read))
+Second exception: ('Connection broken: IncompleteRead(4 bytes read)', IncompleteRead(4 bytes read))
+Second exception: ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+Second exception: ('Connection broken: IncompleteRead(2 bytes read)', IncompleteRead(2 bytes read))
+Second exception: ('Connection broken: IncompleteRead(12 bytes read)', IncompleteRead(12 bytes read))
+Second exception: ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+Second exception: ('Connection broken: IncompleteRead(48 bytes read)', IncompleteRead(48 bytes read))
+Second exception: ('Connection broken: IncompleteRead(32 bytes read)', IncompleteRead(32 bytes read))
+Second exception: HTTPSConnectionPool(host='stream.twitter.com', port=443): Read timed out.
+Second exception: HTTPSConnectionPool(host='stream.twitter.com', port=443): Read timed out.
+Encountered streaming error ( 420 )

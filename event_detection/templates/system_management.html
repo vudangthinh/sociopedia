@@ -21,6 +21,23 @@
                     }
                 });
             });
+
+            $('button.btn-stop').bind('click', function (event) {
+                var keyword_id = $(this).attr("id");
+                
+                $.ajax({
+                    type: 'GET',
+                    url: "{% url 'stop_streaming' %}",
+                    data: {"keyword_id": keyword_id},
+                    dataType: 'json',
+                    success: function (response) {
+                        $('#tr-'.concat(keyword_id).concat(" td#td-streaming")).text("Finished");
+                    },
+                    error: function (response) {
+                        alert(response);
+                    }
+                });
+            });
         });
     </script>
 </head>
@@ -55,12 +72,12 @@
                 <td><a href="{% url 'view_tweets' pk=key.pk %}">{{ key.keyword }}</a></td>
                 <td>{{ key.search_date }}</td>
                 {% if key.is_streaming %}
-                    <td>Running</td>
+                    <td id="td-streaming">Running</td>
                 {% else %}
-                    <td>Finished</td>
+                    <td id="td-streaming">Finished</td>
                 {% endif %}
                 <td>{{ key.n_tweets }}</td>
-                <td><button>Stop</button></td>
+                <td><button class="btn-stop" id="{{ key.id }}">Stop</button></td>
                 <td><button class="btn-delete" id="{{ key.id }}">Delete</button></td>
             </tr>
         </div>

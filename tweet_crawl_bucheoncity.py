@@ -135,7 +135,7 @@ api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 if __name__ == "__main__":
     writer = open(os.path.join("/data_hdd/socioscope/data",
-                               'tweets_bucheon.csv'), "w", encoding='utf-8')
+                               'tweets_bucheon_2.csv'), "w", encoding='utf-8')
     writer.write(
         "tweet_id,date,user_id,user,retweeted_id,quoted_id,text,quoted_text\n")
 

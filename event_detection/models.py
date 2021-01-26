@@ -24,7 +24,9 @@ class Keyword(models.Model):
     keyword = models.CharField(max_length=200)
     search_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField()
-    is_streaming = models.BooleanField(default=False)
+    is_streaming = models.BooleanField(default=True)
+    error_code = models.IntegerField(default=0)
+    is_forced_stop = models.BooleanField(default=False)
 
     def __str__(self):
         return self.keyword

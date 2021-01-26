@@ -24,7 +24,6 @@ from event_detection.utils import dbpedia_query, event_detect, knowledge_graph_e
 import base64
 import ast
 
-# Create your views here.
 
 def signup(request):
     if request.method == 'POST':
@@ -54,24 +53,19 @@ def search(request):
                 keyword_obj_list.append(keyword_obj)
 
             stream = twitter_search.stream_search(keyword_obj_list)
+            is_error = None
             if stream is None:
-                pass
-            # download_thread = threading.Thread(target=twitter_search.stream_search, args=(post, ))
-            # download_thread.start()
-            # keyword_objs = Keyword.objects.filter(keyword=post.keyword)
-            # tweets = Tweet.objects.filter(keyword=keyword_objs[0])
-            # tweet_texts = []
-            # for tweet in tweets:
-            #     tweet_texts.append(tweet.text)
-
-            return render(request, 'keyword_search.html', {'title': 'search', 'form': form, 'keyword_obj_list': keyword_obj_list})
-    else:
-        form = KeywordSearchForm()
-        end_date = timezone.now() + timedelta(7)
-        form['end_date'].initial = end_date
-        min_date = timezone.now().strftime("%Y/%m/%d")
-        max_date = end_date.strftime("%Y/%m/%d")
-        return render(request, 'keyword_search.html', {'title': 'search', 'form': form, 'min_date': min_date, 'max_date': max_date})
+                is_error = True
+                
+            return render(request, 'keyword_search.html', {'title': 'search', 'form': form, 'keyword_obj_list': keyword_obj_list, 'is_error': is_error})
+       
+    # else:
+    form = KeywordSearchForm()
+    end_date = timezone.now() + timedelta(7)
+    form['end_date'].initial = end_date
+    min_date = timezone.now().strftime("%Y/%m/%d")
+    max_date = end_date.strftime("%Y/%m/%d")
+    return render(request, 'keyword_search.html', {'title': 'search', 'form': form, 'min_date': min_date, 'max_date': max_date})
 
 @login_required
 def data_analysis(request, pk, start_date, end_date):
@@ -210,44 +204,6 @@ def knowledge_graph_linking(request, entity, knowledge_graph):
 
     return render(request, 'knowledge_graph_linking.html', {"entity": entity, "knowledge_graph": keyword_knowledge_graph})
 
-# def knowledge_graph(request):
-#     if request.method == 'POST':
-#         form = KeywordSearchForm(request.POST)
-#         if form.is_valid():
-#             post = form.save(commit=False)
-            
-#             if post.keyword.lower() == 'covid':
-#                 post.keyword = 'donald trump'
-#             else:
-#                 post.keyword = 'covid'
-
-#             keyword = Keyword.objects.filter(keyword=post.keyword.lower())[0]
-#             result = keyword.tweets.all().values('text').order_by('?')[:100]
-#             text_list = []
-#             for tweet in result.iterator():
-#                 text_list.append(tweet['text'])
-
-#             plot_div = knowledge_extract.extract_knowledge_graph(text_list)          
-#             return render(request, 'knowledge_graph.html', {'title': 'word_cloud', 'form': form, 'plot_div': plot_div})
-#     else:
-#         form = KeywordSearchForm()
-#         return render(request, 'knowledge_graph.html', {'title': 'word_cloud', 'form': form})
-
-@csrf_exempt
-def update_search_result(request):
-    '''
-    Update search result in real-time using ajax (not work correctly)
-    '''
-    keyword = request.POST.get('keyword', None)
-    keyword_objs = Keyword.objects.filter(keyword=keyword)
-    tweets = Tweet.objects.filter(keyword=keyword_objs[0])
-    tweet_texts = []
-    for tweet in tweets:
-        tweet_texts.append(tweet.text)
-    data = {'tweets': tweet_texts}
-    
-    return JsonResponse(data)
-
 @login_required
 def system_management(request):
     keywords = request.user.keywords.all()
@@ -255,8 +211,8 @@ def system_management(request):
     for keyword in keywords:
         if keyword.end_date < current_time:
             keyword.is_streaming = False
-        else:
-            keyword.is_streaming = True
+        # else:
+        #     keyword.is_streaming = True
             
         keyword.n_tweets = keyword.tweets.count()
 
@@ -267,6 +223,16 @@ def delete_keyword(request):
     if request.method == "GET":
         keyword_id = request.GET.get('keyword_id', None)
         Keyword.objects.filter(id=keyword_id).delete()
+        
+        return JsonResponse({"id": keyword_id}, status=200)
+
+    return JsonResponse({"error": "not ajax request"}, status=400)
+
+@csrf_exempt
+def stop_streaming(request):
+    if request.method == "GET":
+        keyword_id = request.GET.get('keyword_id', None)
+        Keyword.objects.filter(id=keyword_id).update(is_forced_stop=True)
         
         return JsonResponse({"id": keyword_id}, status=200)
 
@@ -377,150 +343,144 @@ def about(request):
 ################################################################
 ### API
 ################################################################
-from rest_framework import viewsets, permissions
-from event_detection.serializers import KeywordSerializer, TweetSerializer
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
+# from rest_framework import viewsets, permissions
+# from event_detection.serializers import KeywordSerializer, TweetSerializer
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 
-class KeywordList(APIView):
-    permission_classes = (IsAuthenticated,) 
+# class KeywordList(APIView):
+#     permission_classes = (IsAuthenticated,) 
 
-    def get(self, request):
-        queryset = request.user.keywords.all()
-        serializer = KeywordSerializer(queryset, many=True)
-        return Response(serializer.data)
+#     def get(self, request):
+#         queryset = request.user.keywords.all()
+#         serializer = KeywordSerializer(queryset, many=True)
+#         return Response(serializer.data)
 
-class PaginationHandlerMixin(object):
-    @property
-    def paginator(self):
-        if not hasattr(self, '_paginator'):
-            if self.pagination_class is None:
-                self._paginator = None
-            else:
-                self._paginator = self.pagination_class()
-        else:
-            pass
-        return self._paginator
-    def paginate_queryset(self, queryset):
+# class PaginationHandlerMixin(object):
+#     @property
+#     def paginator(self):
+#         if not hasattr(self, '_paginator'):
+#             if self.pagination_class is None:
+#                 self._paginator = None
+#             else:
+#                 self._paginator = self.pagination_class()
+#         else:
+#             pass
+#         return self._paginator
+#     def paginate_queryset(self, queryset):
         
-        if self.paginator is None:
-            return None
-        return self.paginator.paginate_queryset(queryset,
-                   self.request, view=self)
-    def get_paginated_response(self, data):
-        assert self.paginator is not None
-        return self.paginator.get_paginated_response(data)
+#         if self.paginator is None:
+#             return None
+#         return self.paginator.paginate_queryset(queryset,
+#                    self.request, view=self)
+#     def get_paginated_response(self, data):
+#         assert self.paginator is not None
+#         return self.paginator.get_paginated_response(data)
 
-class BasicPagination(PageNumberPagination):
-    page_size_query_param = 'limit'
+# class BasicPagination(PageNumberPagination):
+#     page_size_query_param = 'limit'
 
-class TweetList(APIView, PaginationHandlerMixin):
-    permission_classes = (IsAuthenticated,)
-    pagination_class = BasicPagination
-    serializer_class = TweetSerializer
+# class TweetList(APIView, PaginationHandlerMixin):
+#     permission_classes = (IsAuthenticated,)
+#     pagination_class = BasicPagination
+#     serializer_class = TweetSerializer
 
-    def get(self, request):
+#     def get(self, request):
 
-        keyword_id = request.query_params.get('keyword_id')
-        keyword = Keyword.objects.get(pk=keyword_id)
-        tweets = keyword.tweets.all()
+#         keyword_id = request.query_params.get('keyword_id')
+#         keyword = Keyword.objects.get(pk=keyword_id)
+#         tweets = keyword.tweets.all()
         
-        page = self.paginate_queryset(tweets)
-        if page is not None:
-            serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
-        else:
-            serializer = self.serializer_class(tweets, many=True)
+#         page = self.paginate_queryset(tweets)
+#         if page is not None:
+#             serializer = self.get_paginated_response(self.serializer_class(page, many=True).data)
+#         else:
+#             serializer = self.serializer_class(tweets, many=True)
 
-        return Response(serializer.data)
+#         return Response(serializer.data)
 
-class TopicList(APIView):
-    def get(self, request):
-        keywords = []
+# class TopicList(APIView):
+#     def get(self, request):
+#         keywords = []
 
-        keyword_id = request.query_params.get('keyword_id')
-        tweet_list = utils.get_tweet_in_time_range(keyword_id, None, None)
-        one_gram_counter, two_gram_counter, thr_gram_counter = utils.extract_ngrams(tweet_list)
+#         keyword_id = request.query_params.get('keyword_id')
+#         tweet_list = utils.get_tweet_in_time_range(keyword_id, None, None)
+#         one_gram_counter, two_gram_counter, thr_gram_counter = utils.extract_ngrams(tweet_list)
          
-        keywords.extend([' '.join(value[0]) for value in one_gram_counter.most_common()[:20]])
-        keywords.extend([' '.join(value[0]) for value in two_gram_counter.most_common()[:20]])
-        keywords.extend([' '.join(value[0]) for value in thr_gram_counter.most_common()[:20]])
+#         keywords.extend([' '.join(value[0]) for value in one_gram_counter.most_common()[:20]])
+#         keywords.extend([' '.join(value[0]) for value in two_gram_counter.most_common()[:20]])
+#         keywords.extend([' '.join(value[0]) for value in thr_gram_counter.most_common()[:20]])
 
-        # dbpedia_keywords = utils.suggest_keyword_from_dbpedia(keyword_id)
+#         # dbpedia_keywords = utils.suggest_keyword_from_dbpedia(keyword_id)
 
-        return Response({'topics': keywords})
+#         return Response({'topics': keywords})
 
-class EventList(APIView):
-    def get(self, request):
-        keyword_id = request.query_params.get('keyword_id')
-        topic = request.query_params.get('topic')
-        print(keyword_id, topic)
+# class EventList(APIView):
+#     def get(self, request):
+#         keyword_id = request.query_params.get('keyword_id')
+#         topic = request.query_params.get('topic')
+#         print(keyword_id, topic)
 
-        tweet_list = utils.get_tweet_in_time_range(keyword_id, None, None)
-        time_option = 'hour'
-        x_data_date, y_data_event, y_data, y_proportion = event_detect.get_tweet_distribution_event(tweet_list, topic, time_option)
+#         tweet_list = utils.get_tweet_in_time_range(keyword_id, None, None)
+#         time_option = 'hour'
+#         x_data_date, y_data_event, y_data, y_proportion = event_detect.get_tweet_distribution_event(tweet_list, topic, time_option)
 
-        burst_list, variables = event_detect.detect_event(y_data_event, y_data)
+#         burst_list, variables = event_detect.detect_event(y_data_event, y_data)
 
-        events = []
-        bursts = burst_list[0]
-        for index, burst in bursts.iterrows():
-            start = burst['begin']
-            end = burst['end']
+#         events = []
+#         bursts = burst_list[0]
+#         for index, burst in bursts.iterrows():
+#             start = burst['begin']
+#             end = burst['end']
             
-            start_time = x_data_date[start] #.strftime("%Y-%m-%d %H:%M")
-            end_time = x_data_date[end] #.strftime("%Y-%m-%d %H:%M")
+#             start_time = x_data_date[start] #.strftime("%Y-%m-%d %H:%M")
+#             end_time = x_data_date[end] #.strftime("%Y-%m-%d %H:%M")
             
-            events.append((start_time, end_time))
+#             events.append((start_time, end_time))
 
-        return Response({"events": events})
+#         return Response({"events": events})
 
-class EventKnowledgeList(APIView):
-    def get(self, request):
-        keyword_id = request.query_params.get('keyword_id')
-        topic = request.query_params.get('topic')
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
+# class EventKnowledgeList(APIView):
+#     def get(self, request):
+#         keyword_id = request.query_params.get('keyword_id')
+#         topic = request.query_params.get('topic')
+#         start_date = request.query_params.get('start_date')
+#         end_date = request.query_params.get('end_date')
 
-        tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
-        knowledge_graph_dict = utils.extract_knowledge_graph(tweet_list)
+#         tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
+#         knowledge_graph_dict = utils.extract_knowledge_graph(tweet_list)
 
-        return Response({"event_knowledge": knowledge_graph_dict})
+#         return Response({"event_knowledge": knowledge_graph_dict})
 
-class LinkingKnowledge(APIView):
-    def get(self, request):
-        keyword_id = request.query_params.get('keyword_id')
-        topic = request.query_params.get('topic')
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
-        entity = request.query_params.get('entity')
+# class LinkingKnowledge(APIView):
+#     def get(self, request):
+#         keyword_id = request.query_params.get('keyword_id')
+#         topic = request.query_params.get('topic')
+#         start_date = request.query_params.get('start_date')
+#         end_date = request.query_params.get('end_date')
+#         entity = request.query_params.get('entity')
 
-        tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
-        knowledge_graph_dict = utils.extract_knowledge_graph(tweet_list)
+#         tweet_list = utils.get_tweet_in_time_range(keyword_id, start_date, end_date)
+#         knowledge_graph_dict = utils.extract_knowledge_graph(tweet_list)
 
-        keyword_knowledge_graph = []
-        for _, knowledge in knowledge_graph_dict.items():
-            triple_list = knowledge[1]
-            for triple in triple_list:
-                if entity.lower() == triple[0].lower():
-                    keyword_knowledge_graph.append([entity, triple[1], triple[2], 'extracted'])
-                elif entity.lower() == triple[2].lower():
-                    keyword_knowledge_graph.append([triple[0], triple[1], entity, 'extracted'])
+#         keyword_knowledge_graph = []
+#         for _, knowledge in knowledge_graph_dict.items():
+#             triple_list = knowledge[1]
+#             for triple in triple_list:
+#                 if entity.lower() == triple[0].lower():
+#                     keyword_knowledge_graph.append([entity, triple[1], triple[2], 'extracted'])
+#                 elif entity.lower() == triple[2].lower():
+#                     keyword_knowledge_graph.append([triple[0], triple[1], entity, 'extracted'])
 
-        keyword_dbpedia_graph = utils.get_keyword_dbpedia_graph(entity)
+#         keyword_dbpedia_graph = utils.get_keyword_dbpedia_graph(entity)
 
-        keyword_knowledge_graph.append([entity, 'same as', "dbo:" + entity, 'dbpedia'])
+#         keyword_knowledge_graph.append([entity, 'same as', "dbo:" + entity, 'dbpedia'])
         
-        if keyword_dbpedia_graph is not None:
-            # keyword_knowledge_graph.extend(keyword_dbpedia_graph)
-            for key, value in keyword_dbpedia_graph.items():
-                keyword_knowledge_graph.append(["dbo:" + entity, key, value, 'dbpedia'])
+#         if keyword_dbpedia_graph is not None:
+#             # keyword_knowledge_graph.extend(keyword_dbpedia_graph)
+#             for key, value in keyword_dbpedia_graph.items():
+#                 keyword_knowledge_graph.append(["dbo:" + entity, key, value, 'dbpedia'])
 
-        return Response({"linking_knowledge": keyword_knowledge_graph})
-
-# class KeywordViewSet(viewsets.ModelViewSet):
-    
-#     queryset = Keyword.objects.all()
-#     serializer_class = KeywordSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+#         return Response({"linking_knowledge": keyword_knowledge_graph})

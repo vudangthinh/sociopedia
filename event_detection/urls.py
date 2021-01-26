@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import views
+from . import views, views_api
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.authtoken.models import Token
@@ -12,7 +12,6 @@ urlpatterns = [
     path('signup', views.signup, name='signup'),
 
     path('search', views.search, name='search'),
-    path('update_search_result', views.update_search_result, name='update_search_result'),
     path('system_management', views.system_management, name='system_management'),
     
     # path('word_cloud', views.word_cloud, name='word_cloud'),
@@ -25,6 +24,7 @@ urlpatterns = [
 
     path('ajax/keyword_search', views.load_tweet_dist, name='load_tweet_dist'),
     path('ajax/keyword', views.delete_keyword, name='delete_keyword'),
+    path('ajax/stop_streaming', views.stop_streaming, name='stop_streaming'),
     path('ajax/filter_tweets_intime', views.filter_tweets_intime, name='filter_tweets_intime'),
     path('ajax/analyse', views.analyse, name='analyse'),
     path('ajax/link_entity_dbpedia', views.link_entity_dbpedia, name='link_entity_dbpedia'),
@@ -41,10 +41,10 @@ urlpatterns = [
     # path('sociopedia/', include(router.urls)),
     # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
-    path('keywords/', views.KeywordList.as_view(), name='keyword_list'),
-    path('tweet_list/', views.TweetList.as_view(), name='tweet_list'),
-    path('topic_list/', views.TopicList.as_view(), name='topic_list'),
-    path('event_list/', views.EventList.as_view(), name='event_list'),
-    path('event_knowledge_list/', views.EventKnowledgeList.as_view(), name='event_knowledge_list'),
-    path('linking_knowledge/', views.LinkingKnowledge.as_view(), name='linking_knowledge'),
+    path('keywords/', views_api.KeywordList.as_view(), name='keyword_list'),
+    path('tweet_list/', views_api.TweetList.as_view(), name='tweet_list'),
+    path('topic_list/', views_api.TopicList.as_view(), name='topic_list'),
+    path('event_list/', views_api.EventList.as_view(), name='event_list'),
+    path('event_knowledge_list/', views_api.EventKnowledgeList.as_view(), name='event_knowledge_list'),
+    path('linking_knowledge/', views_api.LinkingKnowledge.as_view(), name='linking_knowledge'),
 ]
