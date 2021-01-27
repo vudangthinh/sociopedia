@@ -52,12 +52,13 @@
     </nav>
 </div>
 
-<table class="table">
+<table class="table table-striped">
     <thead class="thead-dark">
         <tr>
             <th scope="col">#</th>
             <th scope="col">Keyword</th>
             <th scope="col">Search Date</th>
+            <th scope="col">End Date</th>
             <th scope="col">Status</th>
             <th scope="col">Tweets</th>
             <th scope="col">Handle</th>
@@ -71,6 +72,7 @@
                 <th scope="row">{{ forloop.counter }}</th>
                 <td><a href="{% url 'view_tweets' pk=key.pk %}">{{ key.keyword }}</a></td>
                 <td>{{ key.search_date }}</td>
+                <td>{{ key.end_date }}</td>
                 {% if key.is_streaming %}
                     <td id="td-streaming">Running</td>
                 {% else %}

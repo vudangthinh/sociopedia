@@ -218,6 +218,9 @@ def system_management(request):
 
     return render(request, 'system_management.html', {'title': 'system_management', 'keywords': keywords})
 
+def api_document(request):
+    return render(request, 'api_document.html', {'title': 'api_document'})
+
 @csrf_exempt
 def delete_keyword(request):
     if request.method == "GET":

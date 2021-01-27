@@ -1,5 +1,5 @@
 {% load static %}
-
+<link rel="icon"href="{% static 'favicon.ico' %}">
 <!doctype html>
 <html lang="en">
 
@@ -122,6 +122,9 @@
                     </li>
                     <li class="nav-item {% if title == 'system_management' %} active {% endif %}">
                         <a class="nav-link" href="{% url 'system_management'%}">Manage</a>
+                    </li>
+                    <li class="nav-item {% if title == 'api_document' %} active {% endif %}">
+                        <a class="nav-link" href="{% url 'api_document'%}">API</a>
                     </li>
                     <li class="nav-item {% if title == 'about' %} active {% endif %}">
                         <a class="nav-link" href="{% url 'about'%}">About</a>

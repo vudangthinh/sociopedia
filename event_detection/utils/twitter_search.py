@@ -123,6 +123,7 @@ class StreamListener(tweepy.StreamListener):
         
         if stop_stream:
             for keyword_obj in new_keyword_list:
+                keyword_obj.end_date = timezone.now()
                 keyword_obj.is_streaming = False
                 keyword_obj.save()
                 
@@ -137,6 +138,7 @@ class StreamListener(tweepy.StreamListener):
             return True
         else:
             for keyword_obj in new_keyword_list:
+                keyword_obj.end_date = timezone.now()
                 keyword_obj.is_streaming = False
                 keyword_obj.save()
 
@@ -147,6 +149,7 @@ class StreamListener(tweepy.StreamListener):
     def on_error(self, status_code):
         print('Encountered streaming error (', status_code, ')')
         for keyword_obj in self.keyword_obj_list:
+            keyword_obj.end_date = timezone.now()
             keyword_obj.is_streaming = False
             keyword_obj.error_code = status_code
             keyword_obj.save()

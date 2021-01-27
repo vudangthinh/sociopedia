@@ -13,6 +13,7 @@ urlpatterns = [
 
     path('search', views.search, name='search'),
     path('system_management', views.system_management, name='system_management'),
+    path('api_document', views.api_document, name='api_document'),
     
     # path('word_cloud', views.word_cloud, name='word_cloud'),
     # path('knowledge_graph', views.knowledge_graph, name='knowledge_graph'),

@@ -160,7 +160,7 @@ def analyse_wordcloud(tweet_list, request):
     stopwords = set(STOPWORDS)
     stopwords.update(["https", "amp", "RT", "co", "I"])
 
-    wordcloud = WordCloud(stopwords=stopwords, background_color="white", width=1200, height=700, collocations=False).generate(text)
+    wordcloud = WordCloud(font_path='NanumMyeongjo.ttf', stopwords=stopwords, background_color="white", width=1200, height=700, collocations=False).generate(text)
     wordcloud.to_file(f"event_detection/static/event_detection/{request.user.username}.png")
 
     return f'event_detection/{request.user.username}.png'
