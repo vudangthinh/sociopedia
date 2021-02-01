@@ -89,10 +89,10 @@ def detect_event(r, d):
     n = len(r)
 
     # for test
-    # d = pd.Series(np.floor(np.ones(n)*1500 + np.random.normal(scale=40, size=n)))
-    # r = pd.Series(np.floor(np.ones(n)*100 + np.random.normal(scale=10, size=n)))
-    # r[r<0] = 0
-    # r[1:3] = r[1:3] + 200 #r[4:8] = r[4:8] + 200
+    d = pd.Series(np.floor(np.ones(n)*1500 + np.random.normal(scale=40, size=n)))
+    r = pd.Series(np.floor(np.ones(n)*100 + np.random.normal(scale=10, size=n)))
+    r[r<0] = 0
+    r[1:3] = r[1:3] + 200 #r[4:8] = r[4:8] + 200
 
     
     variables = [[1.5, 1.0],

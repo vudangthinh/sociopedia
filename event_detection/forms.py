@@ -1,12 +1,35 @@
 from django import forms
-from .models import Keyword
+from .models import Keyword, TwitterToken
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class KeywordSearchForm(forms.ModelForm):
+    # CHOICES = [('Option 1', 'Minute'), ('Option 2', 'Hour'), ('Option 3', 'Day'), ('Option 4', 'Week'), ('Option 5', 'Month')]
+    # token_selection = forms.ChoiceField(label='Show by time frequency', choices=CHOICES)
+
+    token_selection = forms.ModelChoiceField(queryset=TwitterToken.objects.none())
+
     class Meta:
         model = Keyword
-        fields = ('keyword', 'end_date')
+        fields = ('keyword', 'end_date', 'token_selection')
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(KeywordSearchForm, self).__init__(*args, **kwargs)
+
+        user_tokens = self.user.tokens.all()
+        admin_user = User.objects.get(username='admin')
+        admin_tokens = admin_user.tokens.all()
+        tokens = user_tokens | admin_tokens
+
+        self.fields['token_selection'] = forms.ModelChoiceField(queryset=tokens)
+
+
+class TokenAddForm(forms.ModelForm):
+    class Meta:
+        model = TwitterToken
+        fields = ('consumer_key', 'consumer_secret', 'access_token', 'access_token_secret')
 
 class SelectTimeRangeForm(forms.Form):
     start_date = forms.DateTimeField(input_formats=['%d/%m/%Y %H:%M'])

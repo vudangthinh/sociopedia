@@ -14,6 +14,7 @@ urlpatterns = [
     path('search', views.search, name='search'),
     path('system_management', views.system_management, name='system_management'),
     path('api_document', views.api_document, name='api_document'),
+    path('token_management', views.token_management, name='token_management'),
     
     # path('word_cloud', views.word_cloud, name='word_cloud'),
     # path('knowledge_graph', views.knowledge_graph, name='knowledge_graph'),
@@ -22,6 +23,7 @@ urlpatterns = [
     path('detect_event/<int:pk>/<str:start_date>/<str:end_date>/', views.detect_event, name='detect_event'),
     path('event_knowledge/<int:pk>/<str:start_date>/<str:end_date>/', views.event_knowledge, name='event_knowledge'),
     path('knowledge_graph_linking/<str:entity>/<str:knowledge_graph>/', views.knowledge_graph_linking, name='knowledge_graph_linking'),
+    path('delete_token/<int:pk>/', views.delete_token, name="delete_token"),
 
     path('ajax/keyword_search', views.load_tweet_dist, name='load_tweet_dist'),
     path('ajax/keyword', views.delete_keyword, name='delete_keyword'),

@@ -64,6 +64,25 @@
             };
             var options = {};
             var network = new vis.Network(container, data, options);
+
+            var entity = {{entity | js}};
+            var dbpedia_graph = {{dbpedia_graph | js}};
+            console.log(dbpedia_graph);
+
+            $("#triple-table tbody").html('');
+            
+            index = 1;
+            $.each(dbpedia_graph, function (key, val) {
+                $("#triple-table tbody").append(
+                    '<tr>' +
+                    '<th scope="row">' + index + '</th>' +
+                    '<td>' + entity + '</td>' +
+                    '<td>' + key + '</td>' +
+                    '<td>' + val + '</td>' +
+                    '</tr>'
+                )
+                index++;
+            });
         });
     </script>
 </head>
@@ -71,5 +90,20 @@
 <h3>Linking knowledge graph:</h3>
 
 <div id="knowledge-graph"></div>
+
+<h4>DBpedia knowledge</h4>
+<table class="table" id="triple-table">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Entity</th>
+            <th scope="col">Predicate</th>
+            <th scope="col">Object</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
 
 {% endblock %}
