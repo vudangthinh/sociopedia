@@ -160,25 +160,27 @@ class StreamListener(tweepy.StreamListener):
         # else:
         #     return True
 
-def stream_search(keyword_obj_list):
+def stream_search(keyword_obj_list, used_token):
     keywords = set()
     for keyword_obj in keyword_obj_list:
         keywords.add(keyword_obj.keyword)
 
-    tokens = TwitterToken.objects.all() # filter only token of admin and current user???
-    used_token = None
-    for token in tokens:
-        if token.used_count < 2:
-            used_token = token
-            token.used_count += 1
-            token.save()
-            break
+    # tokens = TwitterToken.objects.all() # filter only token of admin and current user???
+    # used_token = None
+    # for token in tokens:
+    #     if token.used_count < 2:
+    #         used_token = token
+    #         token.used_count += 1
+    #         token.save()
+    #         break
     
-    if used_token is None:
-        used_token = tokens[0]
-        used_token.used_count += 1
-        used_token.save()
+    # if used_token is None:
+    #     used_token = tokens[0]
+    #     used_token.used_count += 1
+    #     used_token.save()
     
+    used_token.used_count += 1
+    used_token.save()
     # used_token.consumer_key = '9TvVKS8HRroMN4wQtBdzNA'
     # used_token.consumer_secret = 'BrmSzXi4sGzDiRdj7kbPHMRLQNMkbpHeDqtLhWPhU'
     # used_token.access_token = '1287392767-m7gcpy3wkpNpvMpywC9wwBTzIivWVXvLabhZMlA'

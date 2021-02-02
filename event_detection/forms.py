@@ -8,7 +8,7 @@ class KeywordSearchForm(forms.ModelForm):
     # CHOICES = [('Option 1', 'Minute'), ('Option 2', 'Hour'), ('Option 3', 'Day'), ('Option 4', 'Week'), ('Option 5', 'Month')]
     # token_selection = forms.ChoiceField(label='Show by time frequency', choices=CHOICES)
 
-    token_selection = forms.ModelChoiceField(queryset=TwitterToken.objects.none())
+    token_selection = forms.ModelChoiceField(queryset=TwitterToken.objects.none(), widget=forms.Select(attrs={"onChange":'checkToken()'}))
 
     class Meta:
         model = Keyword
@@ -23,7 +23,7 @@ class KeywordSearchForm(forms.ModelForm):
         admin_tokens = admin_user.tokens.all()
         tokens = user_tokens | admin_tokens
 
-        self.fields['token_selection'] = forms.ModelChoiceField(queryset=tokens)
+        self.fields['token_selection'] = forms.ModelChoiceField(queryset=tokens, widget=forms.Select(attrs={"onChange":'checkToken()'}))
 
 
 class TokenAddForm(forms.ModelForm):

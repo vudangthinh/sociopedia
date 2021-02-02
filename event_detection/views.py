@@ -52,7 +52,8 @@ def search(request):
                 keyword_obj = Keyword.objects.create(user=request.user, keyword=keyword.strip(), search_date=timezone.now(), end_date=post.end_date)
                 keyword_obj_list.append(keyword_obj)
 
-            stream = twitter_search.stream_search(keyword_obj_list)
+            used_token = form.cleaned_data['token_selection']
+            stream = twitter_search.stream_search(keyword_obj_list, used_token)
             is_error = None
             if stream is None:
                 is_error = True
@@ -382,6 +383,17 @@ def delete_token(request, pk):
     admin_tokens = admin_user.tokens.all()
     tokens = user_tokens | admin_tokens
     return render(request, 'token_management.html', {'title': 'token_management', 'form': form, 'tokens': tokens})
+
+@csrf_exempt
+def token_streaming_count_check(request):
+    if request.is_ajax and request.method == "POST":
+        token_id = request.POST.get('token_id', None)
+        token = TwitterToken.objects.filter(id=token_id).first()
+        streaming_count = token.used_count
+
+        return JsonResponse({'streaming_count': streaming_count}, status=200)
+
+    return JsonResponse({"error": ""}, status=400)
 
 def home(request):
     return render(request, 'home.html', {'title': 'home'})
