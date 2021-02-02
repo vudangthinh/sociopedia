@@ -73,7 +73,17 @@
           </button>
         </div>
         <div class="modal-body">
+            
             There is another streaming task is using this token. Please select another token, or make your own token to use.
+            <br><br>
+            <ul>
+            <li>
+                Please refer to this link to know how to make your Twitter token: <a href="https://developer.twitter.com/en/docs/getting-started" target="_blank">Twitter API Doc</a>
+            </li>
+            <li>
+                Then you can add and manage your tokens here: <a href="{% url 'token_management'%}">Manage your tokens</a>
+            </li>
+            </ul>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
