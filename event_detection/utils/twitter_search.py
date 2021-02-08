@@ -181,10 +181,6 @@ def stream_search(keyword_obj_list, used_token):
     
     used_token.used_count += 1
     used_token.save()
-    # used_token.consumer_key = '9TvVKS8HRroMN4wQtBdzNA'
-    # used_token.consumer_secret = 'BrmSzXi4sGzDiRdj7kbPHMRLQNMkbpHeDqtLhWPhU'
-    # used_token.access_token = '1287392767-m7gcpy3wkpNpvMpywC9wwBTzIivWVXvLabhZMlA'
-    # used_token.access_token_secret = 'RHNCzFoLOpUHZhLQu7mDkJGsgtA3xtpKm35596ZfuRY'
 
     auth = tweepy.OAuthHandler(used_token.consumer_key, used_token.consumer_secret)
     auth.set_access_token(used_token.access_token, used_token.access_token_secret)

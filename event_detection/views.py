@@ -358,7 +358,18 @@ def token_management(request):
     user_tokens = request.user.tokens.all()
     admin_user = User.objects.get(username='admin')
     admin_tokens = admin_user.tokens.all()
-    tokens = user_tokens | admin_tokens
+
+
+    # for token in admin_tokens:
+    #     token.consumer_key = "admin"
+    #     token.consumer_secret = 'admin'
+    #     token.access_token = 'admin'
+    #     token.access_token_secret = "admin"
+
+    tokens = user_tokens #| admin_tokens
+
+
+
     return render(request, 'token_management.html', {'title': 'token_management', 'form': form, 'tokens': tokens})
 
 def delete_token(request, pk):

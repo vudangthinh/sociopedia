@@ -63,34 +63,39 @@
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Token</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Token</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                There is another streaming task is using this token. Using one token for streaming more than one task
+                can lead to error. Please select another token, or create your own token to use.
+                <br><br>
+                <ul>
+                    <li>
+                        Please refer to this link to know how to make your Twitter token: <a
+                            href="https://developer.twitter.com/en/docs/getting-started" target="_blank">Twitter API
+                            Doc</a>
+                    </li>
+                    <li>
+                        Then you can add and manage your tokens here: <a href="{% url 'token_management'%}">Manage your
+                            tokens</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
         </div>
-        <div class="modal-body">
-            
-            There is another streaming task is using this token. Please select another token, or make your own token to use.
-            <br><br>
-            <ul>
-            <li>
-                Please refer to this link to know how to make your Twitter token: <a href="https://developer.twitter.com/en/docs/getting-started" target="_blank">Twitter API Doc</a>
-            </li>
-            <li>
-                Then you can add and manage your tokens here: <a href="{% url 'token_management'%}">Manage your tokens</a>
-            </li>
-            </ul>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
 {% load crispy_forms_tags %}
 
