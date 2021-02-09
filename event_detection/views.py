@@ -359,16 +359,15 @@ def token_management(request):
     admin_user = User.objects.get(username='admin')
     admin_tokens = admin_user.tokens.all()
 
+    # for token in list(admin_tokens):
+    #     token.consumer_key = token.consumer_key[:3] + "".join(["*" for i in range(len(token.consumer_key) - 3)]) 
+    #     token.consumer_secret = token.consumer_secret[:3] + "".join(["*" for i in range(len(token.consumer_secret) - 3)]) 
+    #     token.access_token = token.access_token[:3] + "".join(["*" for i in range(len(token.access_token) - 3)]) 
+    #     token.access_token_secret = token.access_token_secret[:3] + "".join(["*" for i in range(len(token.access_token_secret) - 3)]) 
 
-    # for token in admin_tokens:
-    #     token.consumer_key = "admin"
-    #     token.consumer_secret = 'admin'
-    #     token.access_token = 'admin'
-    #     token.access_token_secret = "admin"
-
-    tokens = user_tokens #| admin_tokens
-
-
+    tokens = user_tokens | admin_tokens
+    # tokens = list(user_tokens)
+    # tokens.extend(list(admin_tokens))
 
     return render(request, 'token_management.html', {'title': 'token_management', 'form': form, 'tokens': tokens})
 
@@ -392,7 +391,17 @@ def delete_token(request, pk):
         delete_token.delete()    
 
     admin_tokens = admin_user.tokens.all()
+
+    # for token in list(admin_tokens):
+    #     token.consumer_key = token.consumer_key[:3] + "".join(["*" for i in range(len(token.consumer_key) - 3)]) 
+    #     token.consumer_secret = token.consumer_secret[:3] + "".join(["*" for i in range(len(token.consumer_secret) - 3)]) 
+    #     token.access_token = token.access_token[:3] + "".join(["*" for i in range(len(token.access_token) - 3)]) 
+    #     token.access_token_secret = token.access_token_secret[:3] + "".join(["*" for i in range(len(token.access_token_secret) - 3)]) 
+
     tokens = user_tokens | admin_tokens
+    # tokens = list(user_tokens)
+    # tokens.extend(list(admin_tokens))
+
     return render(request, 'token_management.html', {'title': 'token_management', 'form': form, 'tokens': tokens})
 
 @csrf_exempt
