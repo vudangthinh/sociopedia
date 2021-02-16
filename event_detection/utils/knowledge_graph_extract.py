@@ -29,11 +29,40 @@ def extract_entity_relation_sent(text):
     else:
         return None
 
-def extract_entity(text):
+def extract_entity_relation_sent_ko(text):
+    from konlpy.tag import Kkma
+    kkma = Kkma()
+    postags = kkma.pos(text)
+
+    head_entity = ''
+    tail_entity = ''
+    relation = ''
+    head_type = 'KO' #temporary to represent korean entity
+    tail_type = 'KO'
+
+    for tag in postags:
+        if tag[1] == 'NNG' and head_entity == '':
+            head_entity = tag[0]
+        elif tag[1] == 'NNG' and tail_entity == '':
+            tail_entity = tag[0]
+        elif tag[1] == 'VV' and relation == '':
+            relation = tag[0]
+
+    if head_entity != '' and tail_entity != '' and relation != '':
+        return (head_entity, relation, tail_entity, head_type, tail_type)
+    else:
+        return None
+
+
+def extract_entity(text, lang='en'):
     sents = text.split('.')
     triple_list = []
     for sent in sents:
-        triple = extract_entity_relation_sent(sent)
+        if lang == 'en':
+            triple = extract_entity_relation_sent(sent)
+        elif lang == 'ko':
+            triple = extract_entity_relation_sent_ko(sent)
+
         if triple != None:
             triple_list.append(triple)
             

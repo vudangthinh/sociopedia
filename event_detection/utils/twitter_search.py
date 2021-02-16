@@ -12,6 +12,7 @@ import time
 from django.utils import timezone
 from event_detection.utils import knowledge_graph_extract, text_utils
 from django.utils.timezone import make_aware
+from langdetect import detect
 
 class StreamListener(tweepy.StreamListener):
     def __init__(self, keyword_obj_list, used_token, q=Queue()):
@@ -89,7 +90,7 @@ class StreamListener(tweepy.StreamListener):
                                             text=text, 
                                             quoted_text=quoted_text)
 
-                        triple_list = knowledge_graph_extract.extract_entity(text_utils.pre_process(text))
+                        triple_list = knowledge_graph_extract.extract_entity(text_utils.pre_process(text), lang=detect(keyword))
                         for triple in triple_list:
                             Knowledge.objects.create(tweet=tweet_obj,
                                                     k_subject=triple[0],
