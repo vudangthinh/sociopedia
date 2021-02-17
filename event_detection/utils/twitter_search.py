@@ -90,7 +90,11 @@ class StreamListener(tweepy.StreamListener):
                                             text=text, 
                                             quoted_text=quoted_text)
 
-                        triple_list = knowledge_graph_extract.extract_entity(text_utils.pre_process(text), lang=detect(keyword))
+                        lang = detect(keyword)
+                        if lang == 'en':
+                            text = text_utils.pre_process(text)
+
+                        triple_list = knowledge_graph_extract.extract_entity(text, lang=lang)
                         for triple in triple_list:
                             Knowledge.objects.create(tweet=tweet_obj,
                                                     k_subject=triple[0],

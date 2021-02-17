@@ -32,7 +32,11 @@ def extract_entity_relation_sent(text):
 def extract_entity_relation_sent_ko(text):
     from konlpy.tag import Kkma
     kkma = Kkma()
-    postags = kkma.pos(text)
+    try:
+        postags = kkma.pos(text)
+    except Exception as e:
+        print(e)
+        return None
 
     head_entity = ''
     tail_entity = ''
@@ -41,18 +45,17 @@ def extract_entity_relation_sent_ko(text):
     tail_type = 'KO'
 
     for tag in postags:
-        if tag[1] == 'NNG' and head_entity == '':
+        if tag[1][0] == 'N' and head_entity == '':
             head_entity = tag[0]
-        elif tag[1] == 'NNG' and tail_entity == '':
-            tail_entity = tag[0]
-        elif tag[1] == 'VV' and relation == '':
+        elif tag[1][0] == 'V' and relation == '':
             relation = tag[0]
+        elif tag[1][0] == 'N' and tail_entity == '' and relation != '':
+            tail_entity = tag[0]
 
     if head_entity != '' and tail_entity != '' and relation != '':
         return (head_entity, relation, tail_entity, head_type, tail_type)
     else:
         return None
-
 
 def extract_entity(text, lang='en'):
     sents = text.split('.')
